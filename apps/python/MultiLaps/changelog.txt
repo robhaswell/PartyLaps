@@ -1,0 +1,44 @@
+v1.1
+----
+- Added indication about the amount of lap done since the last pit stop
+- Reset the performance meter after the first corner when exiting the pit lane
+
+v1.0
+----
+- Workaround for the Nürburgring Touristenfahrten, thanks to PanaRace970
+
+v0.5
+----
+
+- Hotfix for AC 1.3 (64bits)
+- Added best lap locking feature
+
+v0.4
+----
+
+- Support for the multi-configurations tracks in AC 1.1.X (Vallelunga and the Nürb)
+- Support for A -> B tracks
+
+v0.3
+----
+
+- Added a new performance delta algorithm for the current lap
+- Added the option to remember the best lap across sessions and game restarts
+- Added the option to log the lap times in a text file (in MultiLaps_session folder)
+- Added top 25%, top 50% and top 75% lap times average references
+- Added opacity and border settings
+- Bug correction for update time conversion
+
+v0.2
+----
+
+- Added configuration widget
+- Added median reference
+- Added gradient colors for the deltas
+- Added icons
+- Bug correction when the app is used during a replay
+
+v0.1
+----
+
+- Initial release
