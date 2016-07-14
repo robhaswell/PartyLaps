@@ -1,14 +1,15 @@
-# Name:       MultiLaps for Assetto Corsa
+# Name:       PartyLaps for Assetto Corsa
 # Version:    v1.1
-# Anthor:     Sylvain Villet
-# Contact:    sylvain.villet@gmail.com
+# Anthor:     Rob Haswell
+# Contact:    me@robhaswell.co.uk
 # Date:       01.05.2016
+# Original:   Sylvlain Villet <sylvain.villet@gmail.com>
 # Desc.:      This app provides a list of the last "N" laps
 #             done, the current lap projection and performance
 #             delta, and the total session time.
 #             The deltas can be calculated from the best lap, the median
 #             or the average time of the top 25, 50 or 75% laps.
-#             The app can be fully configured from the MultiLaps_config widget.
+#             The app can be fully configured from the PartyLaps_config widget.
 # 
 # Thanks:     - Rombik for the sim_info module
 #             - Rivali (OV1Info) and Fernando Deutsch (ferito-LiveCarTracker)
@@ -19,7 +20,6 @@ import acsys
 import sys
 import os
 import configparser
-import math
 import time
 import platform
 
@@ -44,8 +44,11 @@ logLaps = 1
 logBest = "always"
 lockBest = 0
 
+driversList = []
+driversListText = ""
+
 # Objects
-multiLapsApp = 0
+partyLapsApp = 0
 config = 0
 configApp = 0
 
@@ -74,19 +77,19 @@ nurbTourist = False
 # import libraries
 try:
     if platform.architecture()[0] == "64bit":
-      sysdir='apps/python/MultiLaps/MultiLaps_dll/stdlib64'
+      sysdir='apps/python/PartyLaps/PartyLaps_dll/stdlib64'
     else:
-      sysdir='apps/python/MultiLaps/MultiLaps_dll/stdlib'
+      sysdir='apps/python/PartyLaps/PartyLaps_dll/stdlib'
     sys.path.insert(0, sysdir)
     os.environ['PATH'] = os.environ['PATH'] + ";."
 
-    from MultiLaps_lib.sim_info import info
+    from PartyLaps_lib.sim_info import info
 except Exception as e:
-    ac.log("MultiLaps: Error importing libraries: %s" % e)
+    ac.log("PartyLaps: Error importing libraries: %s" % e)
 
 def acMain(ac_version):
     try:
-        global multiLapsApp, configApp, config
+        global partyLapsApp, configApp, config
         global showHeader, fontSize, opacity, showBorder
         global lapDisplayedCount, showDelta, deltaColor, redAt, greenAt
         global reference, showCurrent, showReference, showTotal
@@ -95,10 +98,10 @@ def acMain(ac_version):
         global nurbTourist
 
         if ac_version < 1.0:
-            return "MultiLaps"
+            return "PartyLaps"
 
         config = configparser.ConfigParser()
-        config.read("apps/python/MultiLaps/MultiLaps_config/config.ini")
+        config.read("apps/python/PartyLaps/PartyLaps_config/config.ini")
 
         showHeader        = config.getint("SETTINGS", "showHeader")
         fontSize          = config.getint("SETTINGS", "fontSize")
@@ -117,40 +120,42 @@ def acMain(ac_version):
         logLaps           = config.getint("SETTINGS", "logLaps")
         logBest           = config.get("SETTINGS", "logBest")
         lockBest          = config.getint("SETTINGS", "lockBest")
+        driversListText   = config.get("SETTINGS", "driversListText")
+        driversList       = explodeCSL(driversListText)
 
         trackName = ac.getTrackName(0)
         trackConf = ac.getTrackConfiguration(0)
         carName = ac.getCarName(0)
 
         if trackConf == "":
-            bestLapFile = "apps/python/MultiLaps/MultiLaps_bestlap/{0} - {1}.ini".format(
+            bestLapFile = "apps/python/PartyLaps/PartyLaps_bestlap/{0} - {1}.ini".format(
                 trackName, carName)
         else:
-            bestLapFile = "apps/python/MultiLaps/MultiLaps_bestlap/{0} [{1}] - {2}.ini".format(
+            bestLapFile = "apps/python/PartyLaps/PartyLaps_bestlap/{0} [{1}] - {2}.ini".format(
                 trackName, trackConf, carName)
         
         if trackName == "ks_nordschleife" and trackConf == "touristenfahrten":
             nurbTourist = True
 
-        multiLapsApp = MultiLaps("MultiLaps", "Laps")
-        multiLapsApp.refreshParameters()
-        ac.addRenderCallback(multiLapsApp.window, onRenderCallback)
+        partyLapsApp = PartyLaps("PartyLaps", "Laps")
+        partyLapsApp.refreshParameters()
+        ac.addRenderCallback(partyLapsApp.window, onRenderCallback)
         
-        configApp = MultiLaps_config("MultiLaps_config", "MultiLaps config", fontSizeConfig, 0)
+        configApp = PartyLaps_config("PartyLaps_config", "PartyLaps config", fontSizeConfig, 0)
         configApp.updateView()
         
-        return "MultiLaps"
+        return "PartyLaps"
     except Exception as e:
-        ac.log("MultiLaps: Error in acMain: %s" % e)
+        ac.log("PartyLaps: Error in acMain: %s" % e)
 
 def acShutdown():
     try:
         if info.graphics.status != 1:
-            multiLapsApp.writeSession()
-            multiLapsApp.writeBestLap()
+            partyLapsApp.writeSession()
+            partyLapsApp.writeBestLap()
 
     except Exception as e:
-        ac.log("MultiLaps: Error in acShutdown: %s" % e)
+        ac.log("PartyLaps: Error in acShutdown: %s" % e)
 
 def writeParameters():
     try:
@@ -171,24 +176,25 @@ def writeParameters():
         config.set("SETTINGS", "logLaps",  str(logLaps))
         config.set("SETTINGS", "logBest",  str(logBest))
         config.set("SETTINGS", "lockBest",  str(lockBest))
+        config.set("SETTINGS", "driversListText", driversListText)
 
-        configFile = open("apps/python/MultiLaps/MultiLaps_config/config.ini", 'w')
+        configFile = open("apps/python/PartyLaps/PartyLaps_config/config.ini", 'w')
         config.write(configFile)
         configFile.close()
 
     except Exception as e:
-        ac.log("MultiLaps: Error in writeParameters while writing the file: %s" % e)
+        ac.log("PartyLaps: Error in writeParameters while writing the file: %s" % e)
 
 def refreshAndWriteParameters():
     try:
-        multiLapsApp.refreshParameters()
-        multiLapsApp.updateData()
-        multiLapsApp.updateView()
+        partyLapsApp.refreshParameters()
+        partyLapsApp.updateData()
+        partyLapsApp.updateView()
         configApp.updateView()
         writeParameters()
 
     except Exception as e:
-        ac.log("MultiLaps: Error in refreshAndWriteParameters: %s" % e)
+        ac.log("PartyLaps: Error in refreshAndWriteParameters: %s" % e)
 
 def acUpdate(deltaT):
     try:
@@ -202,22 +208,22 @@ def acUpdate(deltaT):
 
         # block refresh during replay
         #if info.graphics.status != 1:
-        multiLapsApp.updateData()
-        multiLapsApp.updateView()
+        partyLapsApp.updateData()
+        partyLapsApp.updateView()
         configApp.updateView()
 
     except Exception as e:
-        ac.log("MultiLaps: Error in acUpdate: %s" % e)        
+        ac.log("PartyLaps: Error in acUpdate: %s" % e)        
 
 def onRenderCallback(deltaT):
     try:
-        multiLapsApp.onRenderCallback(deltaT)
+        partyLapsApp.onRenderCallback(deltaT)
         configApp.onRenderCallback(deltaT)
         
     except Exception as e:
-        ac.log("MultiLaps: Error in onRenderCallback: %s" % e)
+        ac.log("PartyLaps: Error in onRenderCallback: %s" % e)
 
-class MultiLaps:
+class PartyLaps:
 
     def __init__(self, name, headerName):    
         self.headerName = headerName
@@ -514,7 +520,7 @@ class MultiLaps:
             self.bestLapTime = lapTime
             self.currentLapData.append((1.0, lapTime))
             self.bestLapData = self.currentLapData
-            #ac.log("MultiLaps: New best lap time: {0} Data: {1}".format(timeToString(self.bestLapTime), str(self.bestLapData)))
+            #ac.log("PartyLaps: New best lap time: {0} Data: {1}".format(timeToString(self.bestLapTime), str(self.bestLapData)))
 
         # Reset for the new lap
         self.currentLapData = [(0.0,0.0)]
@@ -634,10 +640,10 @@ class MultiLaps:
             if logLaps and len(self.laps) > 0:
                 lapsLog = configparser.ConfigParser()
                 if trackConf == "":
-                    fileName = "apps/python/MultiLaps/MultiLaps_session/{0} - {1} - {2}.ini".format(
+                    fileName = "apps/python/PartyLaps/PartyLaps_session/{0} - {1} - {2}.ini".format(
                         trackName, carName, time.strftime("%Y-%m-%d"))
                 else:
-                    fileName = "apps/python/MultiLaps/MultiLaps_session/{0} [{1}] - {2} - {3}.ini".format(
+                    fileName = "apps/python/PartyLaps/PartyLaps_session/{0} [{1}] - {2} - {3}.ini".format(
                         trackName, trackConf, carName, time.strftime("%Y-%m-%d"))
 
                 if os.path.exists(fileName):
@@ -666,7 +672,7 @@ class MultiLaps:
                 lapsLogFile.close()
 
         except Exception as e:
-            ac.log("MultiLaps class: Error in writeSession: %s" % e)
+            ac.log("PartyLaps class: Error in writeSession: %s" % e)
 
     def readBestLap(self):
         try:
@@ -684,7 +690,7 @@ class MultiLaps:
                     self.referenceTime = 0
 
         except Exception as e:
-            ac.log("MultiLaps class: Error in writeBestLap: %s" % e)
+            ac.log("PartyLaps class: Error in writeBestLap: %s" % e)
 
     def resetBestLap(self):
         try:
@@ -695,7 +701,7 @@ class MultiLaps:
                 os.remove(bestLapFile)
 
         except Exception as e:
-            ac.log("MultiLaps class: Error in resetBestLap: %s" % e)
+            ac.log("PartyLaps class: Error in resetBestLap: %s" % e)
 
     def writeBestLap(self):
         try:
@@ -719,7 +725,7 @@ class MultiLaps:
                 fd.close()
 
         except Exception as e:
-            ac.log("MultiLaps class: Error in writeBestLap: %s" % e)
+            ac.log("PartyLaps class: Error in writeBestLap: %s" % e)
 
 '''
 Show header:    Yes       Change
@@ -742,9 +748,14 @@ Log sessions:   Yes       Change
 Remember best:  Always    Change
 Best lap:       1:52.123  Reset
 Lock best:      Locked    Lock/Unlock
-'''
-class MultiLaps_config:
 
+Driver names, comma-separated:
+[ ]
+'''
+class PartyLaps_config:
+    """
+    A configuration widget.
+    """
     def __init__(self, name, headerName, fontSize, showHeader):
         self.headerName = headerName
         self.window = ac.newApp(name)
@@ -762,7 +773,7 @@ class MultiLaps_config:
         widthCenter     = fontSize*5
         widthRight      = fontSize*5
         self.width      = widthLeft + widthCenter + widthRight + 2*spacing
-        height          = self.firstSpacing + (fontSize*1.5 + spacing)*20
+        height          = self.firstSpacing + (fontSize*1.5 + spacing)*22
 
         ac.setSize(self.window, self.width, height)
 
@@ -772,7 +783,7 @@ class MultiLaps_config:
         self.plusButton = []
         self.minusButton = []
 
-        for index in range(20):
+        for index in range(21):
             self.leftLabel.append(ac.addLabel(self.window, ""))
             ac.setFontSize(self.leftLabel[index], fontSize)
             ac.setPosition(self.leftLabel[index], spacing, self.firstSpacing + index*(fontSize*1.5+spacing))
@@ -799,7 +810,7 @@ class MultiLaps_config:
             ac.setFontSize(self.minusButton[index], self.fontSize)
             ac.setPosition(self.minusButton[index], spacing + widthLeft + widthCenter + fontSize*2.5, self.firstSpacing + index*(fontSize*1.5+spacing))
             ac.setSize(self.minusButton[index], fontSize*1.5, fontSize*1.5)
-            
+
         rowIndex = 0
 
         ac.setText(self.leftLabel[rowIndex], "Show header:")
@@ -895,7 +906,7 @@ class MultiLaps_config:
         self.referenceId = rowIndex
 
         rowIndex += 1
-        
+
         ac.setText(self.leftLabel[rowIndex], "Show ref.:")
         ac.addOnClickedListener(self.changeButton[rowIndex], toggleRef)
         ac.setVisible(self.plusButton[rowIndex], 0)
@@ -911,7 +922,7 @@ class MultiLaps_config:
         self.showTotalId = rowIndex
 
         rowIndex += 1
-        
+
         ac.setVisible(self.changeButton[rowIndex], 0)
         ac.setVisible(self.plusButton[rowIndex], 0)
         ac.setVisible(self.minusButton[rowIndex], 0)
@@ -957,6 +968,23 @@ class MultiLaps_config:
         ac.setVisible(self.minusButton[rowIndex], 0)
         self.lockBestId = rowIndex
 
+        rowIndex += 1
+
+        ac.setText(self.leftLabel[rowIndex], "Driver names, comma-separated")
+        # Hide all the widgets used for other rows
+        ac.setVisible(self.changeButton[rowIndex], 0)
+        ac.setVisible(self.plusButton[rowIndex], 0)
+        ac.setVisible(self.minusButton[rowIndex], 0)
+
+        # Text input widget for driver names
+        rowIndex += 1
+
+        self.driversInput = ac.addInputText(self.window, driversListText)
+        ac.addOnValidateListener(self.driversInput, self.validateDrivers)
+        ac.setFontSize(self.driversInput, self.fontSize)
+        ac.setPosition(self.driversInput, spacing, self.firstSpacing + rowIndex*(fontSize*1.5+spacing))
+        ac.setSize(self.driversInput, self.widthLeft + self.widthCenter + self.widthRight, fontSize*1.5)
+
 
     def onRenderCallback(self, deltaT):
         # Update background in case the app has been moved
@@ -997,12 +1025,25 @@ class MultiLaps_config:
 
         ac.setText(self.centerLabel[self.logLapsId], yesOrNo(logLaps))
         ac.setText(self.centerLabel[self.logBestId], logBest.title())
-        ac.setText(self.centerLabel[self.resetBestLapId], timeToString(multiLapsApp.bestLapTime))
+        ac.setText(self.centerLabel[self.resetBestLapId], timeToString(partyLapsApp.bestLapTime))
 
         if lockBest:
             ac.setText(self.centerLabel[self.lockBestId], "Locked")
         else:
             ac.setText(self.centerLabel[self.lockBestId], "Unlocked")
+
+        ac.setText(self.driversInput, driversListText)
+
+    def validateDrivers(self, driversText):
+        """
+        "Validate" the driver list. In practice there is no invalid list of
+        drivers, so simply store the result and redraw the control values in
+        order to update the input control with the reformatted driver list.
+        """
+        driversList = explodeCSL(driversText)
+        driversListText = ", ".join(driversList)
+        self.updateView()
+
 
 def toggleHeader(dummy, variable):
     global showHeader
@@ -1243,7 +1284,7 @@ def toggleLockBest(dummy, variable):
     refreshAndWriteParameters()
 
 def resetBestLap(dummy, variable):
-    multiLapsApp.resetBestLap()
+    partyLapsApp.resetBestLap()
     refreshAndWriteParameters()
 
 def timeToString(time):
@@ -1253,14 +1294,14 @@ def timeToString(time):
         else:
             return "{:d}:{:0>2d}.{:0>3d}".format(int(time/60000), int((time%60000)/1000), int(time%1000))
     except Exception as e:
-        ac.log("MultiLaps: Error in timeToString: %s" % e)
+        ac.log("PartyLaps: Error in timeToString: %s" % e)
         return "-:--.---"
 
 def deltaToString(time):
     try:
         return "{:+.3f}".format(float(time)/1000)
     except Exception as e:
-        ac.log("MultiLaps: Error in deltaToString: %s" % e)
+        ac.log("PartyLaps: Error in deltaToString: %s" % e)
         return "+0.000"
 
 def yesOrNo(value):
@@ -1296,3 +1337,7 @@ def setDelta(label, delta):
                 # color factor [0..1]
                 colorFactor = float(delta)/greenAt
                 ac.setFontColor(label, 1-colorFactor, 1, 1-colorFactor, 1)
+
+
+def explodeCSL(string, sep=','):
+    return map(str.strip, string.split(sep))

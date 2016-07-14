@@ -24,7 +24,7 @@ v0.3
 
 - Added a new performance delta algorithm for the current lap
 - Added the option to remember the best lap across sessions and game restarts
-- Added the option to log the lap times in a text file (in MultiLaps_session folder)
+- Added the option to log the lap times in a text file (in PartyLaps_session folder)
 - Added top 25%, top 50% and top 75% lap times average references
 - Added opacity and border settings
 - Bug correction for update time conversion
