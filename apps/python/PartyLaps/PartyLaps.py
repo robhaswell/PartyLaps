@@ -979,11 +979,11 @@ class PartyLaps_config:
         # Text input widget for driver names
         rowIndex += 1
 
-        self.driversInput = ac.addInputText(self.window, driversListText)
-        ac.addOnValidateListener(self.driversInput, self.validateDrivers)
+        self.driversInput = ac.addTextInput(self.window, driversListText)
+        ac.setText(self.driversInput, driversListText)
         ac.setFontSize(self.driversInput, self.fontSize)
         ac.setPosition(self.driversInput, spacing, self.firstSpacing + rowIndex*(fontSize*1.5+spacing))
-        ac.setSize(self.driversInput, self.widthLeft + self.widthCenter + self.widthRight, fontSize*1.5)
+        ac.setSize(self.driversInput, widthLeft + widthCenter + widthRight, fontSize*1.5)
 
 
     def onRenderCallback(self, deltaT):
@@ -1032,17 +1032,13 @@ class PartyLaps_config:
         else:
             ac.setText(self.centerLabel[self.lockBestId], "Unlocked")
 
-        ac.setText(self.driversInput, driversListText)
-
-    def validateDrivers(self, driversText):
-        """
-        "Validate" the driver list. In practice there is no invalid list of
-        drivers, so simply store the result and redraw the control values in
-        order to update the input control with the reformatted driver list.
-        """
-        driversList = explodeCSL(driversText)
-        driversListText = ", ".join(driversList)
-        self.updateView()
+        # Store new drivers list if it has been changed
+        global driversList, driversListText
+        newDriversListText = ac.getText(self.driversInput)
+        if newDriversListText != driversListText:
+            driversListText = newDriversListText
+            driversList = explodeCSL(driversListText)
+            writeParameters()
 
 
 def toggleHeader(dummy, variable):
