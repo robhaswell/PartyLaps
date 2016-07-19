@@ -152,7 +152,9 @@ def acMain(ac_version):
 
         return "PartyLaps"
     except Exception as e:
+        import traceback
         ac.log("PartyLaps: Error in acMain: %s" % e)
+        ac.log(traceback.format_exc())
 
 def acShutdown():
     try:
@@ -287,6 +289,7 @@ class PartyLaps:
         # Create the driver label and value holders
         self.driverLabel = ac.addLabel(self.window, "Driver")
         self.driverValueLabel = ac.addLabel(self.window, "")
+        ac.setFontAlignment(self.driverValueLabel, 'right')
 
 
     def refreshParameters(self):
@@ -304,15 +307,18 @@ class PartyLaps:
         widthDelta      = fontSize*5
 
         self.width  = widthNumber + widthTime + widthDelta*showDelta + 2*spacing
-        self.height = self.firstSpacing + (fontSize + spacing)*(lapDisplayedCount + showCurrent + showTotal + showReference)
+        self.height = self.firstSpacing + (fontSize + spacing)*(lapDisplayedCount + showCurrent + showTotal + showReference + 1)
 
         ac.setSize(self.window, self.width, self.height)
 
         ac.setFontSize(self.driverLabel, fontSize)
-        ac.setFontSize(self.self.driverValueLabel, fontSize)
+        ac.setFontSize(self.driverValueLabel, fontSize)
 
         ac.setPosition(self.driverLabel, spacing, self.firstSpacing)
         ac.setPosition(self.driverValueLabel, spacing + widthNumber, self.firstSpacing)
+
+        ac.setSize(self.driverLabel, widthNumber, fontSize + spacing)
+        ac.setSize(self.driverValueLabel, widthTime, fontSize + spacing)
 
         for labelIndex in range(lapLabelCount+3):
             rowIndex = labelIndex + 1
@@ -1364,4 +1370,4 @@ def setDelta(label, delta):
 
 
 def explodeCSL(string, sep=','):
-    return map(str.strip, string.split(sep))
+    return list(map(str.strip, string.split(sep)))
