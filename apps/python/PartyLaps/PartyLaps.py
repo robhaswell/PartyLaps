@@ -46,6 +46,7 @@ lockBest = 0
 
 driversList = []
 driversListText = ""
+currentDriver = ""
 
 # Objects
 partyLapsApp = 0
@@ -88,12 +89,16 @@ except Exception as e:
     ac.log("PartyLaps: Error importing libraries: %s" % e)
 
 def acMain(ac_version):
+    """
+    Initialise the application.
+    """
     try:
         global partyLapsApp, configApp, config
         global showHeader, fontSize, opacity, showBorder
         global lapDisplayedCount, showDelta, deltaColor, redAt, greenAt
         global reference, showCurrent, showReference, showTotal
         global updateTime, logLaps, logBest, lockBest
+        global driversListText, driversList, currentDriver
         global trackName, trackConf, carName, bestLapFile
         global nurbTourist
 
@@ -122,6 +127,7 @@ def acMain(ac_version):
         lockBest          = config.getint("SETTINGS", "lockBest")
         driversListText   = config.get("SETTINGS", "driversListText")
         driversList       = explodeCSL(driversListText)
+        currentDriver     = driversList[0]
 
         trackName = ac.getTrackName(0)
         trackConf = ac.getTrackConfiguration(0)
@@ -133,17 +139,17 @@ def acMain(ac_version):
         else:
             bestLapFile = "apps/python/PartyLaps/PartyLaps_bestlap/{0} [{1}] - {2}.ini".format(
                 trackName, trackConf, carName)
-        
+
         if trackName == "ks_nordschleife" and trackConf == "touristenfahrten":
             nurbTourist = True
 
         partyLapsApp = PartyLaps("PartyLaps", "Laps")
         partyLapsApp.refreshParameters()
         ac.addRenderCallback(partyLapsApp.window, onRenderCallback)
-        
+
         configApp = PartyLaps_config("PartyLaps_config", "PartyLaps config", fontSizeConfig, 0)
         configApp.updateView()
-        
+
         return "PartyLaps"
     except Exception as e:
         ac.log("PartyLaps: Error in acMain: %s" % e)
@@ -197,6 +203,10 @@ def refreshAndWriteParameters():
         ac.log("PartyLaps: Error in refreshAndWriteParameters: %s" % e)
 
 def acUpdate(deltaT):
+    """
+    This function is called for every frame rendered. Instruct every app to
+    update its view, if the time since the last update is great enough.
+    """
     try:
         global lastUpdateTime
         lastUpdateTime += deltaT
@@ -274,6 +284,10 @@ class PartyLaps:
         ac.setText(self.lapNumberLabel[self.currLabelId],  "Curr.")
         ac.setText(self.lapNumberLabel[self.totalLabelId], "Tot.")
 
+        # Create the driver label and value holders
+        self.driverLabel = ac.addLabel(self.window, "Driver")
+        self.driverValueLabel = ac.addLabel(self.window, "")
+
 
     def refreshParameters(self):
         if showHeader:
@@ -294,18 +308,26 @@ class PartyLaps:
 
         ac.setSize(self.window, self.width, self.height)
 
-        for index in range(lapLabelCount+3):
-            ac.setFontSize(self.lapNumberLabel[index], fontSize)
-            ac.setPosition(self.lapNumberLabel[index], spacing, self.firstSpacing + index*(fontSize+spacing))
-            ac.setSize(self.lapNumberLabel[index], widthNumber, fontSize+spacing)
+        ac.setFontSize(self.driverLabel, fontSize)
+        ac.setFontSize(self.self.driverValueLabel, fontSize)
 
-            ac.setFontSize(self.timeLabel[index], fontSize)
-            ac.setPosition(self.timeLabel[index], spacing + widthNumber, self.firstSpacing + index*(fontSize+spacing))
-            ac.setSize(self.timeLabel[index], widthTime, fontSize+spacing)
+        ac.setPosition(self.driverLabel, spacing, self.firstSpacing)
+        ac.setPosition(self.driverValueLabel, spacing + widthNumber, self.firstSpacing)
 
-            ac.setFontSize(self.deltaLabel[index], fontSize)
-            ac.setPosition(self.deltaLabel[index], spacing + widthNumber + widthTime, self.firstSpacing + index*(fontSize+spacing))
-            ac.setSize(self.deltaLabel[index], widthTime, fontSize+spacing)
+        for labelIndex in range(lapLabelCount+3):
+            rowIndex = labelIndex + 1
+
+            ac.setFontSize(self.lapNumberLabel[labelIndex], fontSize)
+            ac.setPosition(self.lapNumberLabel[labelIndex], spacing, self.firstSpacing + rowIndex*(fontSize+spacing))
+            ac.setSize(self.lapNumberLabel[labelIndex], widthNumber, fontSize+spacing)
+
+            ac.setFontSize(self.timeLabel[labelIndex], fontSize)
+            ac.setPosition(self.timeLabel[labelIndex], spacing + widthNumber, self.firstSpacing + rowIndex*(fontSize+spacing))
+            ac.setSize(self.timeLabel[labelIndex], widthTime, fontSize+spacing)
+
+            ac.setFontSize(self.deltaLabel[labelIndex], fontSize)
+            ac.setPosition(self.deltaLabel[labelIndex], spacing + widthNumber + widthTime, self.firstSpacing + rowIndex*(fontSize+spacing))
+            ac.setSize(self.deltaLabel[labelIndex], widthTime, fontSize+spacing)
 
         for index in range(lapLabelCount):
             if index < lapDisplayedCount:
@@ -317,7 +339,7 @@ class PartyLaps:
                 ac.setVisible(self.timeLabel[index], 0)
                 ac.setVisible(self.deltaLabel[index], 0)
 
-        rowIndex = lapDisplayedCount
+        rowIndex = lapDisplayedCount + 1
 
         # Current time position
         ac.setPosition(self.lapNumberLabel[self.currLabelId], spacing, self.firstSpacing + rowIndex*(fontSize+spacing))
@@ -578,6 +600,10 @@ class PartyLaps:
         if self.lastLapViewRefreshed != self.lastLapDataRefreshed and info.graphics.status != 1:
             self.updateViewNewLap()
 
+        # Write the current driver display
+        ac.setText(self.driverValueLabel,
+            currentDriver if currentDriver != "" else "OPEN CONFIG TO SET DRIVERS")
+
     def updateViewNewLap(self):
         for index in range(lapDisplayedCount):
             lapIndex = index
@@ -618,7 +644,9 @@ class PartyLaps:
         self.lastLapViewRefreshed = self.lastLapDataRefreshed
 
     def updateViewFast(self):
-        # Refresh current lap projection and performance
+        """
+        Refresh current lap projection and performance.
+        """
         if self.sfCrossed and len(self.bestLapData) > 0 and info.graphics.status != 1 and self.position > 0.00001:
             ac.setText(self.timeLabel[self.currLabelId], timeToString(self.projection))
             if self.pitExitState == PIT_EXIT_STATE_APPLY_OFFSET:
