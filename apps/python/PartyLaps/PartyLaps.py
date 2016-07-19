@@ -998,7 +998,7 @@ class PartyLaps_config:
 
         rowIndex += 1
 
-        ac.setText(self.leftLabel[rowIndex], "Driver names, comma-separated")
+        ac.setText(self.leftLabel[rowIndex], "Driver names, comma-separated:")
         # Hide all the widgets used for other rows
         ac.setVisible(self.changeButton[rowIndex], 0)
         ac.setVisible(self.plusButton[rowIndex], 0)
