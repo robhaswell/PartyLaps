@@ -246,7 +246,7 @@ def onRenderCallback(deltaT):
     try:
         partyLapsApp.onRenderCallback(deltaT)
         configApp.onRenderCallback(deltaT)
-        
+
     except Exception as e:
         ac.log("PartyLaps: Error in onRenderCallback: %s" % e)
 
@@ -308,7 +308,6 @@ class PartyLaps:
 
         ac.addOnClickedListener(self.driverLabel, onClickDriver)
         ac.addOnClickedListener(self.driverValueLabel, onClickDriver)
-
 
     def refreshParameters(self):
         if showHeader:
@@ -1389,7 +1388,6 @@ def setDelta(label, delta):
 
 def explodeCSL(string, sep=','):
     return list(map(str.strip, string.split(sep)))
-
 
 def cycleDriver(drivers, currentDriver):
     """
