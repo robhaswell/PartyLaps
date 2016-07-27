@@ -15,8 +15,14 @@
 #             - Rivali (OV1Info) and Fernando Deutsch (ferito-LiveCarTracker)
 #             for the inspiration and example
 #             - PanaRace970 for the Touristenfahrten workaround
-import ac
-import acsys
+unitTesting = False
+try:
+    import ac
+    import acsys
+except ImportError:
+    # Hopefully in a test case
+    unitTesting = True
+
 import sys
 import os
 import configparser
@@ -76,17 +82,18 @@ PIT_EXIT_STATE_APPLY_OFFSET = 4
 nurbTourist = False
 
 # import libraries
-try:
-    if platform.architecture()[0] == "64bit":
-      sysdir='apps/python/PartyLaps/PartyLaps_dll/stdlib64'
-    else:
-      sysdir='apps/python/PartyLaps/PartyLaps_dll/stdlib'
-    sys.path.insert(0, sysdir)
-    os.environ['PATH'] = os.environ['PATH'] + ";."
+if not unitTesting:
+    try:
+        if platform.architecture()[0] == "64bit":
+          sysdir='apps/python/PartyLaps/PartyLaps_dll/stdlib64'
+        else:
+          sysdir='apps/python/PartyLaps/PartyLaps_dll/stdlib'
+        sys.path.insert(0, sysdir)
+        os.environ['PATH'] = os.environ['PATH'] + ";."
 
-    from PartyLaps_lib.sim_info import info
-except Exception as e:
-    ac.log("PartyLaps: Error importing libraries: %s" % e)
+        from PartyLaps_lib.sim_info import info
+    except Exception as e:
+        ac.log("PartyLaps: Error importing libraries: %s" % e)
 
 def acMain(ac_version):
     """
@@ -127,7 +134,14 @@ def acMain(ac_version):
         lockBest          = config.getint("SETTINGS", "lockBest")
         driversListText   = config.get("SETTINGS", "driversListText")
         driversList       = explodeCSL(driversListText)
-        currentDriver     = driversList[0]
+        try:
+            currentDriver     = config.get("SETTINGS", "currentDriver")
+        except configparser.NoOptionError:
+            try:
+                currentDriver = driversList[0]
+            except IndexError:
+                # This should never happen but hey-ho
+                currentDriver = ''
 
         trackName = ac.getTrackName(0)
         trackConf = ac.getTrackConfiguration(0)
@@ -185,6 +199,7 @@ def writeParameters():
         config.set("SETTINGS", "logBest",  str(logBest))
         config.set("SETTINGS", "lockBest",  str(lockBest))
         config.set("SETTINGS", "driversListText", driversListText)
+        config.set("SETTINGS", "currentDriver", currentDriver)
 
         configFile = open("apps/python/PartyLaps/PartyLaps_config/config.ini", 'w')
         config.write(configFile)
@@ -231,7 +246,7 @@ def onRenderCallback(deltaT):
     try:
         partyLapsApp.onRenderCallback(deltaT)
         configApp.onRenderCallback(deltaT)
-        
+
     except Exception as e:
         ac.log("PartyLaps: Error in onRenderCallback: %s" % e)
 
@@ -291,6 +306,8 @@ class PartyLaps:
         self.driverValueLabel = ac.addLabel(self.window, "")
         ac.setFontAlignment(self.driverValueLabel, 'right')
 
+        ac.addOnClickedListener(self.driverLabel, onClickDriver)
+        ac.addOnClickedListener(self.driverValueLabel, onClickDriver)
 
     def refreshParameters(self):
         if showHeader:
@@ -1371,3 +1388,24 @@ def setDelta(label, delta):
 
 def explodeCSL(string, sep=','):
     return list(map(str.strip, string.split(sep)))
+
+def cycleDriver(drivers, currentDriver):
+    """
+    Return the next driver in the drivers list, or the first driver if it is
+    not found.
+    """
+    if not drivers:
+        return ""
+    returnNow = False
+    for driver in drivers:
+        if returnNow:
+            return driver
+        if driver == currentDriver:
+            returnNow = True
+    return drivers[0]
+
+def onClickDriver(*args):
+    global currentDriver
+    currentDriver = cycleDriver(driversList, currentDriver)
+    writeParameters()
+    return 1
