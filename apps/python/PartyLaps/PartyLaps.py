@@ -10,7 +10,7 @@
 #             The deltas can be calculated from the best lap, the median
 #             or the average time of the top 25, 50 or 75% laps.
 #             The app can be fully configured from the PartyLaps_config widget.
-# 
+#
 # Thanks:     - Rombik for the sim_info module
 #             - Rivali (OV1Info) and Fernando Deutsch (ferito-LiveCarTracker)
 #             for the inspiration and example
@@ -240,7 +240,7 @@ def acUpdate(deltaT):
         configApp.updateView()
 
     except Exception as e:
-        ac.log("PartyLaps: Error in acUpdate: %s" % e)        
+        ac.log("PartyLaps: Error in acUpdate: %s" % e)
 
 def onRenderCallback(deltaT):
     try:
@@ -252,7 +252,7 @@ def onRenderCallback(deltaT):
 
 class PartyLaps:
 
-    def __init__(self, name, headerName):    
+    def __init__(self, name, headerName):
         self.headerName = headerName
         self.window = ac.newApp(name)
 
@@ -390,7 +390,7 @@ class PartyLaps:
         ac.setVisible(self.lapNumberLabel[self.refLabelId], showReference)
         ac.setVisible(self.timeLabel[self.refLabelId], showReference)
         ac.setVisible(self.deltaLabel[self.refLabelId], 0)
-        
+
         ac.setPosition(self.lapNumberLabel[self.refLabelId], spacing, self.firstSpacing + rowIndex*(fontSize+spacing))
         ac.setPosition(self.timeLabel[self.refLabelId], spacing + widthNumber, self.firstSpacing + rowIndex*(fontSize+spacing))
         ac.setPosition(self.deltaLabel[self.refLabelId], spacing + widthNumber + widthTime, self.firstSpacing + rowIndex*(fontSize+spacing))
@@ -453,7 +453,7 @@ class PartyLaps:
             self.pitExitDeltaOffset = self.performance
         elif self.pitExitState == PIT_EXIT_STATE_APPLY_OFFSET and self.lapDone > self.pitExitLap:
             self.pitExitState = PIT_EXIT_STATE_IDLE
-        
+
         # correct pos for Nordschleife tourist setup
         if nurbTourist:
             if self.currentPosition > 0.9525: # bridge
@@ -468,7 +468,7 @@ class PartyLaps:
         #Filter AC's bullshits...
         if self.lastPosition > self.currentPosition and self.currentTime > self.lastCurrentTime and self.currentTime < (self.lastCurrentTime+1000):
             return
-        
+
         self.lastCurrentTime = self.currentTime
 
         self.position = self.currentPosition
@@ -482,7 +482,7 @@ class PartyLaps:
         # This will happend after a reset AND at the beginning of the first lap
         if self.session != self.lastSession or (self.currentTime < 500 and self.lapDone == 0):
             self.currentLapData = [(0.0,0.0)]
-            
+
             self.writeSession()
             self.bestLapTimeSession = 0
             self.total = 0
@@ -560,7 +560,7 @@ class PartyLaps:
 
         if self.bestLapTimeSession == 0 or lapTime < self.bestLapTimeSession:
             self.bestLapTimeSession = lapTime
-        
+
         if not lockBest and (self.bestLapTime == 0 or lapTime < self.bestLapTime):
             self.bestLapTime = lapTime
             self.currentLapData.append((1.0, lapTime))
@@ -569,7 +569,7 @@ class PartyLaps:
 
         # Reset for the new lap
         self.currentLapData = [(0.0,0.0)]
-        
+
         self.total += lapTime
         self.laps.append(lapTime)
 
@@ -604,7 +604,7 @@ class PartyLaps:
 
     def getTopAvg(self, topPercent, lapsSorted):
         count = int((len(lapsSorted) + len(lapsSorted)%2)*topPercent/100)
-        
+
         if count:
             lapSum = 0
             for index in range(count):
@@ -642,13 +642,13 @@ class PartyLaps:
             # Refresh lap times and deltas
             if lapIndex < len(self.laps):
                 ac.setText(self.timeLabel[index], timeToString(self.laps[lapIndex]))
-                
+
                 # Best lap in green
                 if self.laps[lapIndex] == self.bestLapAc:
                     ac.setFontColor(self.timeLabel[index], 0, 1, 0, 1)
                 else:
                     ac.setFontColor(self.timeLabel[index], 1, 1, 1, 1)
-                
+
                 # Refresh delta label
                 setDelta(self.deltaLabel[index], self.laps[lapIndex] - self.referenceTime)
 
@@ -699,14 +699,14 @@ class PartyLaps:
 
                 if os.path.exists(fileName):
                     lapsLog.read(fileName)
-                
+
                 sessionNumer = 1
                 sectionName = "Session {0}".format(sessionNumer)
 
                 while lapsLog.has_section(sectionName):
                     sessionNumer += 1
                     sectionName = "Session {0}".format(sessionNumer)
-                
+
                 lapsLog.add_section(sectionName)
 
                 for index in range(len(self.laps)):
@@ -767,7 +767,7 @@ class PartyLaps:
                 else:
                     configBestLap.add_section("TIME")
                     configBestLap.add_section("DATA")
-                
+
                 configBestLap.set("TIME", "best", str(self.bestLapTime))
                 configBestLap.set("DATA", "data", str(self.bestLapData))
 
@@ -1132,7 +1132,7 @@ def opacityMinus(dummy, variable):
         opacity -= 10
 
     refreshAndWriteParameters()
-        
+
 def toggleBorder(dummy, variable):
     global showBorder
 
@@ -1212,7 +1212,7 @@ def greenAtPlus(dummy, variable):
         greenAt += 200
     elif greenAt < 0:
         greenAt += 100
-    
+
     refreshAndWriteParameters()
 
 def greenAtMinus(dummy, variable):
