@@ -322,7 +322,7 @@ class PartyLaps:
         widthDelta      = fontSize*5
 
         self.width  = widthNumber + widthTime + widthDelta*showDelta + 2*spacing
-        self.height = self.firstSpacing + (fontSize + spacing)*(lapDisplayedCount + showCurrent + showTotal + showReference)
+        self.height = self.firstSpacing + (fontSize + spacing)*(lapDisplayedCount + showCurrent + showTotal + showReference + 1)
 
         ac.setSize(self.window, self.width, self.height)
 
