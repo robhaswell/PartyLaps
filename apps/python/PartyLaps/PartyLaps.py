@@ -134,7 +134,14 @@ def acMain(ac_version):
         lockBest          = config.getint("SETTINGS", "lockBest")
         driversListText   = config.get("SETTINGS", "driversListText")
         driversList       = explodeCSL(driversListText)
-        currentDriver     = driversList[0]
+        try:
+            currentDriver     = config.get("SETTINGS", "currentDriver")
+        except configparser.NoOptionError:
+            try:
+                currentDriver = driversList[0]
+            except IndexError:
+                # This should never happen but hey-ho
+                currentDriver = ''
 
         trackName = ac.getTrackName(0)
         trackConf = ac.getTrackConfiguration(0)
@@ -190,6 +197,7 @@ def writeParameters():
         config.set("SETTINGS", "logBest",  str(logBest))
         config.set("SETTINGS", "lockBest",  str(lockBest))
         config.set("SETTINGS", "driversListText", driversListText)
+        config.set("SETTINGS", "currentDriver", currentDriver)
 
         configFile = open("apps/python/PartyLaps/PartyLaps_config/config.ini", 'w')
         config.write(configFile)
@@ -1388,3 +1396,8 @@ def cycleDriver(drivers, currentDriver):
         if driver == currentDriver:
             returnNow = True
     return drivers[0]
+
+def onClickDriver():
+    global currentDriver
+    currentDriver = cycleDriver(driversList, currentDriver)
+    writeParameters()
