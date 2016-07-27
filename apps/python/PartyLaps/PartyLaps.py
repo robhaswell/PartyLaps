@@ -15,8 +15,14 @@
 #             - Rivali (OV1Info) and Fernando Deutsch (ferito-LiveCarTracker)
 #             for the inspiration and example
 #             - PanaRace970 for the Touristenfahrten workaround
-import ac
-import acsys
+unitTesting = False
+try:
+    import ac
+    import acsys
+except ImportError:
+    # Hopefully in a test case
+    unitTesting = True
+
 import sys
 import os
 import configparser
@@ -76,17 +82,18 @@ PIT_EXIT_STATE_APPLY_OFFSET = 4
 nurbTourist = False
 
 # import libraries
-try:
-    if platform.architecture()[0] == "64bit":
-      sysdir='apps/python/PartyLaps/PartyLaps_dll/stdlib64'
-    else:
-      sysdir='apps/python/PartyLaps/PartyLaps_dll/stdlib'
-    sys.path.insert(0, sysdir)
-    os.environ['PATH'] = os.environ['PATH'] + ";."
+if not unitTesting:
+    try:
+        if platform.architecture()[0] == "64bit":
+          sysdir='apps/python/PartyLaps/PartyLaps_dll/stdlib64'
+        else:
+          sysdir='apps/python/PartyLaps/PartyLaps_dll/stdlib'
+        sys.path.insert(0, sysdir)
+        os.environ['PATH'] = os.environ['PATH'] + ";."
 
-    from PartyLaps_lib.sim_info import info
-except Exception as e:
-    ac.log("PartyLaps: Error importing libraries: %s" % e)
+        from PartyLaps_lib.sim_info import info
+    except Exception as e:
+        ac.log("PartyLaps: Error importing libraries: %s" % e)
 
 def acMain(ac_version):
     """
@@ -1365,3 +1372,19 @@ def setDelta(label, delta):
 
 def explodeCSL(string, sep=','):
     return map(str.strip, string.split(sep))
+
+
+def cycleDriver(drivers, currentDriver):
+    """
+    Return the next driver in the drivers list, or the first driver if it is
+    not found.
+    """
+    if not drivers:
+        return ""
+    returnNow = False
+    for driver in drivers:
+        if returnNow:
+            return driver
+        if driver == currentDriver:
+            returnNow = True
+    return drivers[0]
