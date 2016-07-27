@@ -1406,7 +1406,9 @@ def cycleDriver(drivers, currentDriver):
             returnNow = True
     return drivers[0]
 
-def onClickDriver():
+def onClickDriver(a1, a2):
+    ac.log(a1)
+    ac.log(a2)
     global currentDriver
     currentDriver = cycleDriver(driversList, currentDriver)
     writeParameters()
