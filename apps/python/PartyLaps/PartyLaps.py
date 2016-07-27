@@ -116,8 +116,8 @@ def acMain(ac_version):
         configFile = "apps/python/PartyLaps/PartyLaps_config/config.ini"
         mlConfigFile = "apps/python/MultiLaps/MultiLaps_config/config.ini"
 
-        if os.exists(configFile) or os.exists(mlConfigFile):
-            if os.exists(configFile):
+        if os.path.exists(configFile) or os.path.exists(mlConfigFile):
+            if os.path.exists(configFile):
                 config.read(configFile)
             else:
                 config.read(mlConfigFile)
