@@ -113,35 +113,65 @@ def acMain(ac_version):
             return "PartyLaps"
 
         config = configparser.ConfigParser()
-        config.read("apps/python/PartyLaps/PartyLaps_config/config.ini")
+        configFile = "apps/python/PartyLaps/PartyLaps_config/config.ini"
+        mlConfigFile = "apps/python/MultiLaps/MultiLaps_config/config.ini"
 
-        showHeader        = config.getint("SETTINGS", "showHeader")
-        fontSize          = config.getint("SETTINGS", "fontSize")
-        opacity           = config.getint("SETTINGS", "opacity")
-        showBorder        = config.getint("SETTINGS", "showBorder")
-        lapDisplayedCount = config.getint("SETTINGS", "lapDisplayedCount")
-        showDelta         = config.getint("SETTINGS", "showDelta")
-        deltaColor        = config.get("SETTINGS", "deltaColor")
-        redAt             = config.getint("SETTINGS", "redAt")
-        greenAt           = config.getint("SETTINGS", "greenAt")
-        reference         = config.get("SETTINGS", "reference")
-        showCurrent       = config.getint("SETTINGS", "showCurrent")
-        showTotal         = config.getint("SETTINGS", "showTotal")
-        showReference     = config.getint("SETTINGS", "showReference")
-        updateTime        = config.getint("SETTINGS", "updateTime")
-        logLaps           = config.getint("SETTINGS", "logLaps")
-        logBest           = config.get("SETTINGS", "logBest")
-        lockBest          = config.getint("SETTINGS", "lockBest")
-        driversListText   = config.get("SETTINGS", "driversListText")
-        driversList       = explodeCSL(driversListText)
-        try:
-            currentDriver     = config.get("SETTINGS", "currentDriver")
-        except configparser.NoOptionError:
+        if os.exists(configFile) or os.exists(mlConfigFile):
+            if os.exists(configFile):
+                config.read(configFile)
+            else:
+                config.read(mlConfigFile)
+
+            showHeader        = config.getint("SETTINGS", "showHeader")
+            fontSize          = config.getint("SETTINGS", "fontSize")
+            opacity           = config.getint("SETTINGS", "opacity")
+            showBorder        = config.getint("SETTINGS", "showBorder")
+            lapDisplayedCount = config.getint("SETTINGS", "lapDisplayedCount")
+            showDelta         = config.getint("SETTINGS", "showDelta")
+            deltaColor        = config.get("SETTINGS", "deltaColor")
+            redAt             = config.getint("SETTINGS", "redAt")
+            greenAt           = config.getint("SETTINGS", "greenAt")
+            reference         = config.get("SETTINGS", "reference")
+            showCurrent       = config.getint("SETTINGS", "showCurrent")
+            showTotal         = config.getint("SETTINGS", "showTotal")
+            showReference     = config.getint("SETTINGS", "showReference")
+            updateTime        = config.getint("SETTINGS", "updateTime")
+            logLaps           = config.getint("SETTINGS", "logLaps")
+            logBest           = config.get("SETTINGS", "logBest")
+            lockBest          = config.getint("SETTINGS", "lockBest")
+            driversListText   = config.get("SETTINGS", "driversListText")
+            driversList       = explodeCSL(driversListText)
             try:
-                currentDriver = driversList[0]
-            except IndexError:
-                # This should never happen but hey-ho
-                currentDriver = ''
+                currentDriver     = config.get("SETTINGS", "currentDriver")
+            except configparser.NoOptionError:
+                try:
+                    currentDriver = driversList[0]
+                except IndexError:
+                    # This should never happen but hey-ho
+                    currentDriver = ''
+        else:
+            # New config
+            config.add_section("SETTINGS")
+
+            showHeader = 0
+            fontSize = 18
+            opacity = 50
+            showBorder = 1
+            lapDisplayedCount = 5
+            showDelta = 1
+            deltaColor = "white"
+            redAt = 1000
+            greenAt = -1000
+            reference = "best"
+            showCurrent = 1
+            showReference = 1
+            updateTime = 100
+            logLaps = 1
+            logBest = "always"
+            lockBest = 0
+            driversListText = ''
+            driversList = []
+            currentDriver = ''
 
         trackName = ac.getTrackName(0)
         trackConf = ac.getTrackConfiguration(0)
