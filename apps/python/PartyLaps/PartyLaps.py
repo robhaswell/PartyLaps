@@ -306,6 +306,9 @@ class PartyLaps:
         self.driverValueLabel = ac.addLabel(self.window, "")
         ac.setFontAlignment(self.driverValueLabel, 'right')
 
+        ac.addOnClickedListener(self.driverLabel, onClickDriver)
+        ac.addOnClickedListener(self.driverValueLabel, onClickDriver)
+
 
     def refreshParameters(self):
         if showHeader:
@@ -1407,3 +1410,4 @@ def onClickDriver():
     global currentDriver
     currentDriver = cycleDriver(driversList, currentDriver)
     writeParameters()
+    return 1
