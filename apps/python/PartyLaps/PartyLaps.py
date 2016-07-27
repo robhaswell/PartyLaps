@@ -265,6 +265,7 @@ class PartyLaps:
         self.bestLapAc = 0
         self.bestLapTimeSession = 0
         self.bestLapTime = 0
+        self.bestLapHolder = ""
         self.referenceTime = 0
         self.laps = []
         self.bestLapData = []
@@ -389,7 +390,7 @@ class PartyLaps:
 
         ac.setVisible(self.lapNumberLabel[self.refLabelId], showReference)
         ac.setVisible(self.timeLabel[self.refLabelId], showReference)
-        ac.setVisible(self.deltaLabel[self.refLabelId], 0)
+        ac.setVisible(self.deltaLabel[self.refLabelId], showReference)
 
         ac.setPosition(self.lapNumberLabel[self.refLabelId], spacing, self.firstSpacing + rowIndex*(fontSize+spacing))
         ac.setPosition(self.timeLabel[self.refLabelId], spacing + widthNumber, self.firstSpacing + rowIndex*(fontSize+spacing))
@@ -562,7 +563,9 @@ class PartyLaps:
             self.bestLapTimeSession = lapTime
 
         if not lockBest and (self.bestLapTime == 0 or lapTime < self.bestLapTime):
+            # New record!
             self.bestLapTime = lapTime
+            self.bestLapHolder = currentDriver
             self.currentLapData.append((1.0, lapTime))
             self.bestLapData = self.currentLapData
             #ac.log("PartyLaps: New best lap time: {0} Data: {1}".format(timeToString(self.bestLapTime), str(self.bestLapData)))
@@ -664,6 +667,9 @@ class PartyLaps:
         # Refresh reference
         ac.setText(self.timeLabel[self.refLabelId], timeToString(self.referenceTime))
 
+        # Update the new lap holder view
+        ac.setText(self.deltaLabel[self.refLabelId], self.bestLapHolder)
+
         self.lastLapViewRefreshed = self.lastLapDataRefreshed
 
     def updateViewFast(self):
@@ -733,10 +739,15 @@ class PartyLaps:
                 if os.path.exists(bestLapFile):
                     configBestLap.read(bestLapFile)
                     self.bestLapTime = configBestLap.getint("TIME", "best")
+                    try:
+                        self.bestLapHolder = configBestLap.get("TIME", "holder")
+                    except configparser.NoOptionError:
+                        self.bestLapHolder = ''
                     self.bestLapData = eval(configBestLap.get("DATA", "data"))
                     self.referenceTime = self.bestLapTime
                 else:
                     self.bestLapTime = 0
+                    self.bestLapHolder = ''
                     self.bestLapData = []
                     self.referenceTime = 0
 
@@ -769,6 +780,7 @@ class PartyLaps:
                     configBestLap.add_section("DATA")
 
                 configBestLap.set("TIME", "best", str(self.bestLapTime))
+                configBestLap.set("TIME", "holder", str(self.bestLapHolder))
                 configBestLap.set("DATA", "data", str(self.bestLapData))
 
                 fd = open(bestLapFile, "w")
