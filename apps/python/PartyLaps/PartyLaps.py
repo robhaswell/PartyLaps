@@ -679,6 +679,7 @@ class PartyLaps:
         """
         Refresh current lap projection and performance.
         """
+        self.deltaApp.setBackgroundOpacity()
         if self.sfCrossed and len(self.bestLapData) > 0 and info.graphics.status != 1 and self.position > 0.00001:
             ac.setText(self.timeLabel[self.currLabelId], timeToString(self.projection))
             if self.pitExitState == PIT_EXIT_STATE_APPLY_OFFSET:
@@ -1117,15 +1118,22 @@ class PartyDelta(object):
         self.window = ac.newApp("PartyLaps_delta")
         self.deltaLabel = ac.addLabel(self.window, "-.---")
         ac.setSize(self.window, 150, self.fontSize)
-        ac.setBackgroundOpacity(self.window, 0.0)
         ac.setIconPosition(self.window, -10000, -10000)
         ac.drawBorder(self.window, False)
         ac.setTitle(self.window, "")
+        self.setBackgroundOpacity()
 
         ac.setSize(self.deltaLabel, 150, self.fontSize)
         ac.setPosition(self.deltaLabel, 0, 0)
         ac.setFontSize(self.deltaLabel, self.fontSize)
         ac.setFontAlignment(self.deltaLabel, "center")
+
+
+    def setBackgroundOpacity(self):
+        """
+        Set the opacity to zero. This must be done on every update.'
+        """
+        ac.setBackgroundOpacity(self.window, 0.0)
 
 
     def setDelta(self, delta):
