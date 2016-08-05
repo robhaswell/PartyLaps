@@ -1115,7 +1115,7 @@ class PartyDelta(object):
     fontSize = 48
     def __init__(self):
         self.window = ac.newApp("PartyLaps_delta")
-        self.deltaLabel = ac.addLabel(self.window, "-.--")
+        self.deltaLabel = ac.addLabel(self.window, "-.---")
         ac.setSize(self.window, 150, self.fontSize)
         ac.setBackgroundOpacity(self.window, 0.0)
         ac.setIconPosition(self.window, -10000, -10000)
