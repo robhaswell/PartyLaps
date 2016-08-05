@@ -1118,6 +1118,7 @@ class PartyDelta(object):
         self.deltaLabel = ac.addLabel(self.window, "-.--")
         ac.setSize(self.window, 150, self.fontSize)
         ac.setBackgroundOpacity(self.window, 0.0)
+        ac.setIconPosition(self.window, -10000, -10000)
         ac.drawBorder(self.window, False)
         ac.setTitle(self.window, "")
 
