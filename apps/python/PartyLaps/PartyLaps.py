@@ -766,6 +766,10 @@ class PartyLaps:
             if logBest == "always":
                 configBestLap = configparser.ConfigParser()
 
+                mlBestLapFile = bestLapFile.replace("PartyLaps", "MultiLaps")
+                if not os.path.exists(bestLapFile) and os.path.exists(mlBestLapFile):
+                    bestLapFile = mlBestLapFile
+
                 if os.path.exists(bestLapFile):
                     configBestLap.read(bestLapFile)
                     self.bestLapTime = configBestLap.getint("TIME", "best")
