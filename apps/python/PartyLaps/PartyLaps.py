@@ -1111,17 +1111,19 @@ class PartyDelta(object):
     """
     Display the delta in a separate window.
     """
+
+    fontSize = 48
     def __init__(self):
         self.window = ac.newApp("PartyLaps_delta")
         self.deltaLabel = ac.addLabel(self.window, "-.--")
-        ac.setSize(self.window, 150, 48)
-        ac.setBackgroundOpacity(self.window, 100)
+        ac.setSize(self.window, 150, self.fontSize)
+        ac.setBackgroundOpacity(self.window, 0.0)
         ac.drawBorder(self.window, False)
         ac.setTitle(self.window, "")
 
-        ac.setSize(self.deltaLabel, 150, 48)
+        ac.setSize(self.deltaLabel, 150, self.fontSize)
         ac.setPosition(self.deltaLabel, 0, 0)
-        ac.setFontSize(self.deltaLabel, 24)
+        ac.setFontSize(self.deltaLabel, self.fontSize)
         ac.setFontAlignment(self.deltaLabel, "center")
 
 
