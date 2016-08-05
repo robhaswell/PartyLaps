@@ -1114,6 +1114,13 @@ class PartyDelta(object):
     def __init__(self):
         self.window = ac.newApp("PartyLaps_delta")
         self.deltaLabel = ac.addLabel(self.window, "-.--")
+        ac.setSize(self.window, 150, 24)
+        ac.setBackgroundOpacity(self.window, 0)
+        ac.drawBorder(self.window, False)
+        ac.setTitle(self.window, "")
+
+        ac.setSize(self.deltaLabel, 150, 24)
+        ac.setPosition(self.deltaLabel, 0, 0)
         ac.setFontSize(self.deltaLabel, 24)
         ac.setFontAlignment(self.deltaLabel, "center")
 
