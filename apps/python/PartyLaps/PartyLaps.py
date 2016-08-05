@@ -157,7 +157,9 @@ def acMain(ac_version):
         if trackName == "ks_nordschleife" and trackConf == "touristenfahrten":
             nurbTourist = True
 
-        partyLapsApp = PartyLaps("PartyLaps", "Laps")
+        deltaApp = PartyDelta()
+
+        partyLapsApp = PartyLaps("PartyLaps", "Laps", deltaApp)
         partyLapsApp.refreshParameters()
         ac.addRenderCallback(partyLapsApp.window, onRenderCallback)
 
@@ -252,8 +254,9 @@ def onRenderCallback(deltaT):
 
 class PartyLaps:
 
-    def __init__(self, name, headerName):
+    def __init__(self, name, headerName, deltaApp):
         self.headerName = headerName
+        self.deltaApp = deltaApp
         self.window = ac.newApp(name)
 
         self.lapNumberLabel = []
@@ -653,7 +656,7 @@ class PartyLaps:
                     ac.setFontColor(self.timeLabel[index], 1, 1, 1, 1)
 
                 # Refresh delta label
-                setDelta(self.deltaLabel[index], self.laps[lapIndex] - self.referenceTime)
+                setDelta(self.deltaLabel[index], self.laps[lapIndex] - self.referenceTime, self.deltaApp)
 
             else:
                 ac.setText(self.timeLabel[index], timeToString(0))
@@ -679,9 +682,9 @@ class PartyLaps:
         if self.sfCrossed and len(self.bestLapData) > 0 and info.graphics.status != 1 and self.position > 0.00001:
             ac.setText(self.timeLabel[self.currLabelId], timeToString(self.projection))
             if self.pitExitState == PIT_EXIT_STATE_APPLY_OFFSET:
-                setDelta(self.deltaLabel[self.currLabelId], self.performance-self.pitExitDeltaOffset)
+                setDelta(self.deltaLabel[self.currLabelId], self.performance-self.pitExitDeltaOffset, self.deltaApp)
             else:
-                setDelta(self.deltaLabel[self.currLabelId], self.performance)
+                setDelta(self.deltaLabel[self.currLabelId], self.performance, self.deltaApp)
         else:
             ac.setText(self.timeLabel[self.currLabelId], timeToString(self.currentTime))
             ac.setText(self.deltaLabel[self.currLabelId], "-.---")
@@ -1104,6 +1107,31 @@ class PartyLaps_config:
             writeParameters()
 
 
+class PartyDelta(object):
+    """
+    Display the delta in a separate window.
+    """
+    def __init__(self):
+        self.window = ac.newApp("PartyLaps_delta")
+        self.deltaLabel = ac.addLabel(self.window, "-.--")
+        ac.setFontSize(self.deltaLabel, 24)
+        ac.setFontAlignment(self.deltaLabel, "center")
+
+
+    def setDelta(self, delta):
+        """
+        Set the best lap delta.
+        """
+        ac.setText(self.deltaLabel, delta)
+
+
+    def setColor(self, r, g, b, s):
+        """
+        Set the delta color.
+        """
+        ac.setFontColor(self.deltaLabel, r, g, b, s)
+
+
 def toggleHeader(dummy, variable):
     global showHeader
 
@@ -1369,33 +1397,41 @@ def yesOrNo(value):
     else:
         return "No"
 
-def setDelta(label, delta):
-    ac.setText(label, deltaToString(delta))
+def setDelta(label, delta, deltaApp):
+    deltaStr = deltaToString(delta)
+    ac.setText(label, deltaStr)
+    deltaApp.setDelta(deltaStr)
 
     if delta >= redAt:
         ac.setFontColor(label, 1, 0, 0, 1)
+        deltaApp.setColor(1, 0, 0, 1)
     elif delta <= greenAt:
         ac.setFontColor(label, 0, 1, 0, 1)
+        deltaApp.setColor(0, 1, 0, 1)
     else:
         if deltaColor == "yellow":
             if delta > 0:
                 # color factor [0..1]
                 colorFactor = float(delta)/redAt
                 ac.setFontColor(label, 1, 1-colorFactor, 0, 1)
+                deltaApp.setColor(1, 1-colorFactor, 0, 1)
             else:
                 # color factor [0..1]
                 colorFactor = float(delta)/greenAt
                 ac.setFontColor(label, 1-colorFactor, 1, 0, 1)
+                deltaApp.setColor(1-colorFactor, 1, 0, 1)
 
         elif deltaColor == "white":
             if delta > 0:
                 # color factor [0..1]
                 colorFactor = float(delta)/redAt
                 ac.setFontColor(label, 1, 1-colorFactor, 1-colorFactor, 1)
+                deltaApp.setColor(1, 1-colorFactor, 1-colorFactor, 1)
             else:
                 # color factor [0..1]
                 colorFactor = float(delta)/greenAt
                 ac.setFontColor(label, 1-colorFactor, 1, 1-colorFactor, 1)
+                deltaApp.setColor(1-colorFactor, 1, 1-colorFactor, 1)
 
 
 def explodeCSL(string, sep=','):
