@@ -565,7 +565,7 @@ class PartyLaps:
         if self.bestLapTimeSession == 0 or lapTime < self.bestLapTimeSession:
             self.bestLapTimeSession = lapTime
 
-        if not lockBest and (self.bestLapTime == 0 or lapTime < self.bestLapTime):
+        if not lockBest and (self.bestLapTime == 0 or lapTime < self.bestLapTime) and not self.lapInvalidated:
             # New record!
             self.bestLapTime = lapTime
             self.bestLapHolder = currentDriver
@@ -634,6 +634,9 @@ class PartyLaps:
             currentDriver if currentDriver != "" else "OPEN CONFIG TO SET DRIVERS")
 
     def updateViewNewLap(self):
+        """
+        Refresh the laps and the total.
+        """
         for index in range(lapDisplayedCount):
             lapIndex = index
             if len(self.laps) > lapDisplayedCount:
