@@ -83,5 +83,5 @@ class ACTable(object):
         Return the (x,y) co-ordinates for a cell at position iCol,iRow.
         """
         x = self.paddingX + (sum(self.columnWidths[:iCol]) * self.fontSize) + (iCol * self.spacing)
-        y = self.paddingY + (iRow * self.fontSize) + (max(0, iRow-1) * self.spacing)
+        y = self.paddingY + (iRow * self.fontSize) + (iRow * self.spacing)
         return (x, y)
