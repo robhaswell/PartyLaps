@@ -97,6 +97,9 @@ if not unitTesting:
     except Exception as e:
         ac.log("PartyLaps: Error importing libraries: %s" % e)
 
+
+initialized = False
+
 def acMain(ac_version):
     """
     Initialise the application.
@@ -110,6 +113,8 @@ def acMain(ac_version):
         global driversListText, driversList, currentDriver
         global trackName, trackConf, carName, bestLapFile
         global nurbTourist
+
+        global initialized
 
         if ac_version < 1.0:
             return "PartyLaps"
@@ -163,10 +168,13 @@ def acMain(ac_version):
 
         partyLapsApp = PartyLaps("PartyLaps", "Laps", deltaApp)
         partyLapsApp.refreshParameters()
-        ac.addRenderCallback(partyLapsApp.window, onRenderCallback)
 
         configApp = PartyLaps_config("PartyLaps_config", "PartyLaps config", fontSizeConfig, 0)
         configApp.updateView()
+
+        ac.addRenderCallback(partyLapsApp.window, onRenderCallback)
+
+        initialized = True
 
         return "PartyLaps"
     except Exception as e:
@@ -228,6 +236,8 @@ def acUpdate(deltaT):
     This function is called for every frame rendered. Instruct every app to
     update its view, if the time since the last update is great enough.
     """
+    if not initialized:
+        return
     try:
         global lastUpdateTime
         lastUpdateTime += deltaT
@@ -249,6 +259,9 @@ def acUpdate(deltaT):
         ac.log(traceback.format_exc())
 
 def onRenderCallback(deltaT):
+    """
+    This is called when the app has been moved.
+    """
     try:
         partyLapsApp.onRenderCallback(deltaT)
         configApp.onRenderCallback(deltaT)
@@ -435,6 +448,7 @@ class PartyLaps:
         # Update background and border in case the app has been moved
         ac.setBackgroundOpacity(self.window, float(opacity)/100)
         ac.drawBorder(self.window, showBorder)
+        self.deltaApp.onRenderCallback()
 
     def updateData(self):
         self.updateDataFast()
@@ -701,7 +715,6 @@ class PartyLaps:
         """
         Refresh current lap projection and performance.
         """
-        self.deltaApp.setBackgroundOpacity()
         if self.sfCrossed and len(self.bestLapData) > 0 and info.graphics.status != 1 and self.position > 0.00001:
             ac.setText(self.timeLabel[self.currLabelId], timeToString(self.projection))
             if self.pitExitState == PIT_EXIT_STATE_APPLY_OFFSET:
@@ -1095,8 +1108,6 @@ class PartyLaps_config:
         ac.setText(self.centerLabel[self.lapCountId],   str(lapDisplayedCount))
         ac.setText(self.centerLabel[self.showDeltaId],  yesOrNo(showDelta))
         ac.setText(self.centerLabel[self.deltaColorId], deltaColor.title())
-        import pprint
-        ac.log(pprint.pformat(self.__dict__))
         ac.setText(self.centerLabel[self.redAtId],
                 "{:+.1f} s".format(float(redAt)/1000))
         ac.setText(self.centerLabel[self.greenAtId],
@@ -1154,7 +1165,6 @@ class PartyDelta(object):
         self.deltaLabel = ac.addLabel(self.window, "-.---")
         ac.setSize(self.window, 150, self.fontSize)
         ac.setIconPosition(self.window, -10000, -10000)
-        ac.drawBorder(self.window, False)
         ac.setTitle(self.window, "")
         self.setBackgroundOpacity()
 
@@ -1164,11 +1174,19 @@ class PartyDelta(object):
         ac.setFontAlignment(self.deltaLabel, "center")
 
 
+    def onRenderCallback(self):
+        """
+        Reset the background opacity when the app has been moved.
+        """
+        self.setBackgroundOpacity()
+
+
     def setBackgroundOpacity(self):
         """
-        Set the opacity to zero. This must be done on every update.'
+        Set the opacity to zero.'
         """
         ac.setBackgroundOpacity(self.window, 0.0)
+        ac.drawBorder(self.window, False)
 
 
     def setDelta(self, delta):
