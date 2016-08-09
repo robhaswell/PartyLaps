@@ -12,12 +12,11 @@ class ACTable(object):
         self.nColumns = nColumns
         self.nRows = nRows
 
+        self.data = [[]]
         self.cells = [[]]
 
-        self._initialise()
 
-
-    def _initialise(self):
+    def initialize(self):
         """
         Initialise the data storage array and label array. We are required to
         store cell data so that the cell information can be retrieved when
@@ -25,6 +24,8 @@ class ACTable(object):
         """
         self.data = [[None]*self.nColumns]*self.nRows
 
+        # if self.ac is unavailable then we must be in a test and cannot
+        # proceed.
         if self.ac is None:
             return
 
@@ -33,9 +34,15 @@ class ACTable(object):
             for label in row:
                 self.ac.removeLabel(label)
 
-        self.cells = [
-                [ self.ac.addLabel(self.window, 0) for i in xrange(self.nColumns) ]
-            for j in xrange(self.nRows) ]
+        self.cells = [[None]*self.nColumns]*self.nRows
+        for i in xrange(self.nColumns):
+            for j in xrange(self.nRows):
+                label = self.ac.addLabel(self.window, 0)
+                self.ac.setSize(label, self.columnWidths[i] * self.fontSize, self.fontSize)
+                self.ac.setPosition(label, *self._cellPosition(i, j))
+                self.ac.setFontSize(label, self.fontSize)
+                self.ac.setFontAlignment(label, self.columnAlignments[i])
+                self.cells[j][i] = label
 
 
     def setFontSize(self, fontSize):
@@ -78,10 +85,17 @@ class ACTable(object):
         self.columnAlignments = columnAlignments
 
 
-    def _cellPosition(self, iCol, iRow):
+    def _cellPosition(self, iX, iY):
         """
-        Return the (x,y) co-ordinates for a cell at position iCol,iRow.
+        Return the (x,y) co-ordinates for a cell at position iX,iY.
         """
-        x = self.paddingX + (sum(self.columnWidths[:iCol]) * self.fontSize) + (iCol * self.spacing)
-        y = self.paddingY + (iRow * self.fontSize) + (iRow * self.spacing)
+        x = self.paddingX + (sum(self.columnWidths[:iX]) * self.fontSize) + (iX * self.spacing)
+        y = self.paddingY + (iY * self.fontSize) + (iY * self.spacing)
         return (x, y)
+
+
+    def setCellValue(self, iX, iY, text):
+        """
+        Set the cell text at position iX,iY.
+        """
+        self.ac.setText(self.cells[iY][iX], text)

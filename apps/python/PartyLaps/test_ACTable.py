@@ -10,17 +10,19 @@ class TestInit(unittest.TestCase):
 
     def testDataArraySimple(self):
         """
-        We can initialise a 1x1 data array.
+        We can initialize a 1x1 data array.
         """
         table = ACTable(None, None, 1, 1)
+        table.initialize()
         self.assertEqual(table.data, [[None]])
 
 
     def testDataArrayLarge(self):
         """
-        We can initialise a 3x4 data array.
+        We can initialize a 3x4 data array.
         """
         table = ACTable(None, None, 3, 4)
+        table.initialize()
         self.assertEqual(table.data, [
             [None, None, None],
             [None, None, None],
@@ -44,6 +46,7 @@ class TestCellPositions(unittest.TestCase):
         self.table.setCellSpacing(3)
         self.table.setColumnWidths(5, 6, 7)
         self.table.setFontSize(18)
+        self.table.initialize()
 
 
     def testTopLeft(self):
