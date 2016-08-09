@@ -29,6 +29,8 @@ import configparser
 import time
 import platform
 
+from ACTable import ACTable
+
 # Parameters from config file
 showHeader = 0
 fontSize = 18
@@ -306,12 +308,29 @@ class PartyLaps:
         ac.setText(self.lapNumberLabel[self.totalLabelId], "Tot.")
 
         # Create the driver label and value holders
-        self.driverLabel = ac.addLabel(self.window, "Driver")
-        self.driverValueLabel = ac.addLabel(self.window, "")
-        ac.setFontAlignment(self.driverValueLabel, 'right')
+        self.table = ACTable(ac, self.window, 3, 1)
+        self.table.setTablePadding(5, 5)
+        self.table.setCellSpacing(3)
+        self.table.setColumnWidths(2, 5, 5)
+        self.table.setColumnAlignments("left", "right", "right")
+        self.table.setFontSize(fontSize)
 
-        ac.addOnClickedListener(self.driverLabel, onClickDriver)
-        ac.addOnClickedListener(self.driverValueLabel, onClickDriver)
+        self.driverLabel = (0, 0)
+        self.driverValueLabel = (0, 1)
+
+        ac.addOnClickedListener(self.table.getCellLabel(*self.driverLabel), self.onClickDriver)
+        ac.addOnClickedListener(self.table.getCellLabel(*self.driverValueLabel), self.onClickDriver)
+
+        self.setDriverCellValues()
+
+
+    def setDriverCellValues(self):
+        """
+        Set the values for the current driver information row.
+        """
+        self.table.setCellValue("Driver:", *self.driverLabel)
+        self.table.setCellValue(currentDriver, *self.driverValueLabel)
+
 
     def refreshParameters(self):
         if showHeader:
@@ -331,15 +350,6 @@ class PartyLaps:
         self.height = self.firstSpacing + (fontSize + spacing)*(lapDisplayedCount + showCurrent + showTotal + showReference + 1)
 
         ac.setSize(self.window, self.width, self.height)
-
-        ac.setFontSize(self.driverLabel, fontSize)
-        ac.setFontSize(self.driverValueLabel, fontSize)
-
-        ac.setPosition(self.driverLabel, spacing, self.firstSpacing)
-        ac.setPosition(self.driverValueLabel, spacing + widthNumber, self.firstSpacing)
-
-        ac.setSize(self.driverLabel, widthNumber, fontSize + spacing)
-        ac.setSize(self.driverValueLabel, widthTime, fontSize + spacing)
 
         for labelIndex in range(lapLabelCount+3):
             rowIndex = labelIndex + 1
@@ -1115,6 +1125,13 @@ class PartyLaps_config:
             writeParameters()
 
 
+    def onClickDriver(self, *args):
+        global currentDriver
+        currentDriver = cycleDriver(driversList, currentDriver)
+        writeParameters()
+        return 1
+
+
 class PartyDelta(object):
     """
     Display the delta in a separate window.
@@ -1477,9 +1494,3 @@ def cycleDriver(drivers, currentDriver):
         if driver == currentDriver:
             returnNow = True
     return drivers[0]
-
-def onClickDriver(*args):
-    global currentDriver
-    currentDriver = cycleDriver(driversList, currentDriver)
-    writeParameters()
-    return 1

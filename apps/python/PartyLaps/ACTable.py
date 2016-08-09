@@ -94,8 +94,12 @@ class ACTable(object):
         return (x, y)
 
 
-    def setCellValue(self, iX, iY, text):
+    def setCellValue(self, text, iX, iY):
         """
         Set the cell text at position iX,iY.
         """
         self.ac.setText(self.cells[iY][iX], text)
+
+
+    def getCellLabel(self, iX, iY):
+        return self.cells[iX][iY]
