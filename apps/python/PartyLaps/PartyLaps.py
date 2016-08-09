@@ -480,7 +480,6 @@ class PartyLaps:
         self.bestLapAc = ac.getCarState(0, acsys.CS.BestLap)
 
         self.lapInvalidated = info.physics.numberOfTyresOut == 4 or self.lapInvalidated
-        ac.console("Lap invalidated: %s" %  (repr(self.lapInvalidated),))
 
         self.session = info.graphics.session
 
