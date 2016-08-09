@@ -1093,8 +1093,10 @@ class PartyLaps_config:
         ac.setText(self.centerLabel[self.lapCountId],   str(lapDisplayedCount))
         ac.setText(self.centerLabel[self.showDeltaId],  yesOrNo(showDelta))
         ac.setText(self.centerLabel[self.deltaColorId], deltaColor.title())
-        ac.setText(self.centerLabel[self.redAtId],      "{:+.1f} s".format(float(redAt)/1000))
-        ac.setText(self.centerLabel[self.greenAtId],    "{:+.1f} s".format(float(greenAt)/1000))
+        ac.setText(self.centerLabel[self.redAtId],
+                "{:+.1f} s".format(float(redAt)/1000))
+        ac.setText(self.centerLabel[self.greenAtId],
+                "{:+.1f} s".format(float(greenAt)/1000))
         ac.setText(self.centerLabel[self.showCurrentId], yesOrNo(showCurrent))
 
         if reference == "best":
