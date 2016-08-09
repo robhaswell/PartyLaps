@@ -68,3 +68,9 @@ class TestCellPositions(unittest.TestCase):
         result = self.table._cellPosition(0, 1)
         expected = (5, 5 + 18 + 3)
         self.assertEqual(result, expected)
+
+
+    def testThirdRow(self):
+        result = self.table._cellPosition(0, 2)
+        expected = (5, 5 + 18 + 3 + 18 + 3)
+        self.assertEqual(result, expected)
