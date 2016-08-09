@@ -49,3 +49,8 @@ class TestCellPositions(unittest.TestCase):
         result = self.table._cellPosition(0, 0)
         expected = (5, 5)
         self.assertEqual(result, expected)
+
+    def testTopMiddle(self):
+        result = self.table._cellPosition(1, 0)
+        expected = (5 + (5 * 18) + 3, 5)
+        self.assertEqual(result, expected)
