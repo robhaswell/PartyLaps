@@ -45,12 +45,20 @@ class TestCellPositions(unittest.TestCase):
         self.table.setColumnWidths(5, 6, 7)
         self.table.setFontSize(18)
 
+
     def testTopLeft(self):
         result = self.table._cellPosition(0, 0)
         expected = (5, 5)
         self.assertEqual(result, expected)
 
+
     def testTopMiddle(self):
         result = self.table._cellPosition(1, 0)
         expected = (5 + (5 * 18) + 3, 5)
+        self.assertEqual(result, expected)
+
+
+    def testTopRight(self):
+        result = self.table._cellPosition(2, 0)
+        expected = (5 + (5 * 18) + 3 + (6 * 18) + 3, 5)
         self.assertEqual(result, expected)
