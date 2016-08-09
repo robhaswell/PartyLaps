@@ -354,6 +354,8 @@ class PartyLaps:
 
         ac.setSize(self.window, self.width, self.height)
 
+        self.setDriverCellValues()
+
         for labelIndex in range(lapLabelCount+3):
             rowIndex = labelIndex + 1
 
@@ -1093,6 +1095,8 @@ class PartyLaps_config:
         ac.setText(self.centerLabel[self.lapCountId],   str(lapDisplayedCount))
         ac.setText(self.centerLabel[self.showDeltaId],  yesOrNo(showDelta))
         ac.setText(self.centerLabel[self.deltaColorId], deltaColor.title())
+        import pprint
+        ac.log(pprint.pformat(self.__dict__))
         ac.setText(self.centerLabel[self.redAtId],
                 "{:+.1f} s".format(float(redAt)/1000))
         ac.setText(self.centerLabel[self.greenAtId],
