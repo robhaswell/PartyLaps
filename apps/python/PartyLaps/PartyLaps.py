@@ -244,7 +244,9 @@ def acUpdate(deltaT):
         configApp.updateView()
 
     except Exception as e:
+        import traceback
         ac.log("PartyLaps: Error in acUpdate: %s" % e)
+        ac.log(traceback.format_exc())
 
 def onRenderCallback(deltaT):
     try:

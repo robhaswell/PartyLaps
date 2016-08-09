@@ -104,4 +104,4 @@ class ACTable(object):
 
 
     def getCellLabel(self, iX, iY):
-        return self.cells[iX][iY]
+        return self.cells[iY][iX]
