@@ -317,7 +317,7 @@ class PartyLaps:
         self.table.initialize()
 
         self.driverLabel = (0, 0)
-        self.driverValueLabel = (0, 1)
+        self.driverValueLabel = (1, 0)
 
         ac.addOnClickedListener(self.table.getCellLabel(*self.driverLabel), self.onClickDriver)
         ac.addOnClickedListener(self.table.getCellLabel(*self.driverValueLabel), self.onClickDriver)

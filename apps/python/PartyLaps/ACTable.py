@@ -35,8 +35,8 @@ class ACTable(object):
                 self.ac.removeLabel(label)
 
         self.cells = [[None]*self.nColumns]*self.nRows
-        for i in xrange(self.nColumns):
-            for j in xrange(self.nRows):
+        for i in range(self.nColumns):
+            for j in range(self.nRows):
                 label = self.ac.addLabel(self.window, 0)
                 self.ac.setSize(label, self.columnWidths[i] * self.fontSize, self.fontSize)
                 self.ac.setPosition(label, *self._cellPosition(i, j))
@@ -89,6 +89,8 @@ class ACTable(object):
         """
         Return the (x,y) co-ordinates for a cell at position iX,iY.
         """
+        self.ac.log(" ".join(map(str, [type(iX), type(iY), type(self.fontSize), type(self.spacing)])))
+        self.ac.log(repr(self.columnWidths))
         x = self.paddingX + (sum(self.columnWidths[:iX]) * self.fontSize) + (iX * self.spacing)
         y = self.paddingY + (iY * self.fontSize) + (iY * self.spacing)
         return (x, y)
