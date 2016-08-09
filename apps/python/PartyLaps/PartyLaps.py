@@ -314,6 +314,7 @@ class PartyLaps:
         self.table.setColumnWidths(2, 5, 5)
         self.table.setColumnAlignments("left", "right", "right")
         self.table.setFontSize(fontSize)
+        self.table.initialize()
 
         self.driverLabel = (0, 0)
         self.driverValueLabel = (0, 1)
@@ -712,6 +713,14 @@ class PartyLaps:
             ac.setFontColor(self.timeLabel[self.currLabelId], 1, 0, 0, 1)
         else:
             ac.setFontColor(self.timeLabel[self.currLabelId], 1, 1, 1, 1)
+
+
+    def onClickDriver(self, *args):
+        global currentDriver
+        currentDriver = cycleDriver(driversList, currentDriver)
+        writeParameters()
+        return 1
+
 
     def writeSession(self):
         try:
@@ -1123,13 +1132,6 @@ class PartyLaps_config:
             driversListText = newDriversListText
             driversList = explodeCSL(driversListText)
             writeParameters()
-
-
-    def onClickDriver(self, *args):
-        global currentDriver
-        currentDriver = cycleDriver(driversList, currentDriver)
-        writeParameters()
-        return 1
 
 
 class PartyDelta(object):
