@@ -480,7 +480,7 @@ class PartyLaps:
         self.bestLapAc = ac.getCarState(0, acsys.CS.BestLap)
 
         self.lapInvalidated = ac.getCarState(0, acsys.CS.LapInvalidated)
-        ac.log("acsys.CS.LapInvalidated: %s" %  (repr(self.lapInvalidated),))
+        ac.console("acsys.CS.LapInvalidated: %s" %  (repr(self.lapInvalidated),))
 
         self.session = info.graphics.session
 
