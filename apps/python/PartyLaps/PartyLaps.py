@@ -276,7 +276,7 @@ class PartyLaps:
         self.sfCrossed = 0
         self.session = info.graphics.session
         self.lastSession = 0
-        self.lapInvalidated = 0
+        self.lapInvalidated = False
         self.justCrossedSf = False
         self.position = 0
         self.lastPosition = 0
@@ -479,7 +479,8 @@ class PartyLaps:
         self.lastPosition = self.currentPosition
         self.bestLapAc = ac.getCarState(0, acsys.CS.BestLap)
 
-        self.lapInvalidated = ac.getCarState(0, acsys.CS.LapInvalidated)
+        self.lapInvalidated = info.physics.numberOfTyresOut == 4 or self.lapInvalidated
+        ac.console("Lap invalidated: %s" %  (repr(self.lapInvalidated),))
 
         self.session = info.graphics.session
 
@@ -544,6 +545,9 @@ class PartyLaps:
             self.performance = self.performanceAc + (self.bestLapAc - self.referenceTime)*self.position
 
     def updateDataNewLap(self):
+        """
+        A new lap has been started.
+        """
         self.lastLapDataRefreshed = self.lapDone
 
         # Reset
@@ -565,7 +569,7 @@ class PartyLaps:
         if self.bestLapTimeSession == 0 or lapTime < self.bestLapTimeSession:
             self.bestLapTimeSession = lapTime
 
-        if not lockBest and (self.bestLapTime == 0 or lapTime < self.bestLapTime):
+        if not lockBest and (self.bestLapTime == 0 or lapTime < self.bestLapTime) and not self.lapInvalidated:
             # New record!
             self.bestLapTime = lapTime
             self.bestLapHolder = currentDriver
@@ -575,6 +579,7 @@ class PartyLaps:
 
         # Reset for the new lap
         self.currentLapData = [(0.0,0.0)]
+        self.lapInvalidated = False
 
         self.total += lapTime
         self.laps.append(lapTime)
@@ -634,6 +639,9 @@ class PartyLaps:
             currentDriver if currentDriver != "" else "OPEN CONFIG TO SET DRIVERS")
 
     def updateViewNewLap(self):
+        """
+        Refresh the laps and the total.
+        """
         for index in range(lapDisplayedCount):
             lapIndex = index
             if len(self.laps) > lapDisplayedCount:
