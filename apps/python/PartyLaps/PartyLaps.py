@@ -655,6 +655,8 @@ class PartyLaps:
         if self.lastLapViewRefreshed != self.lastLapDataRefreshed and info.graphics.status != 1:
             self.updateViewNewLap()
 
+        self.setDriverCellValues()
+
 
     def updateViewNewLap(self):
         """
@@ -725,7 +727,6 @@ class PartyLaps:
     def onClickDriver(self, *args):
         global currentDriver
         currentDriver = cycleDriver(driversList, currentDriver)
-        self.setDriverCellValues()
         writeParameters()
         return 1
 
