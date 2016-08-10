@@ -328,7 +328,7 @@ class PartyLaps:
         self.driverLabel = (0, 0)
         self.driverValueLabel = (1, 0)
 
-        self.currLabelIndex = lapDisplayedCount + 2
+        self.currLabelIndex = lapDisplayedCount + 1
         self.totLabelIndex = lapDisplayedCount + 3
 
         self.table.setCellValue("Curr.", 0, self.currLabelIndex)
