@@ -315,8 +315,7 @@ class PartyLaps:
 
         self.table.draw()
 
-        self.driverLabel = (0, 0)
-        self.driverValueLabel = (1, 0)
+        self.table.setCellValue("Driver:", 0, 0)
 
         self.currRowIndex = lapDisplayedCount + showCurrent
         self.refRowIndex = lapDisplayedCount + showCurrent + showReference
@@ -355,9 +354,9 @@ class PartyLaps:
         """
         Set the values for the current driver information row.
         """
-        self.table.setCellValue("Driver:", *self.driverLabel)
-        self.table.setCellValue(currentDriver if currentDriver != "" else "OPEN CONFIG TO SET DRIVERS",
-                *self.driverValueLabel)
+        self.table.setCellValue(
+                currentDriver if currentDriver != "" else "OPEN CONFIG TO SET DRIVERS",
+                0, 1)
 
 
     def refreshParameters(self):
