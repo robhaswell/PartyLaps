@@ -337,7 +337,8 @@ class PartyLaps:
         Set the values for the current driver information row.
         """
         self.table.setCellValue("Driver:", *self.driverLabel)
-        self.table.setCellValue(currentDriver, *self.driverValueLabel)
+        self.table.setCellValue(currentDriver if currentDriver != "" else "OPEN CONFIG TO SET DRIVERS",
+                *self.driverValueLabel)
 
 
     def refreshParameters(self):
@@ -654,9 +655,6 @@ class PartyLaps:
         if self.lastLapViewRefreshed != self.lastLapDataRefreshed and info.graphics.status != 1:
             self.updateViewNewLap()
 
-        # Write the current driver display
-        ac.setText(self.driverValueLabel,
-            currentDriver if currentDriver != "" else "OPEN CONFIG TO SET DRIVERS")
 
     def updateViewNewLap(self):
         """
@@ -727,6 +725,7 @@ class PartyLaps:
     def onClickDriver(self, *args):
         global currentDriver
         currentDriver = cycleDriver(driversList, currentDriver)
+        self.setDriverCellValues()
         writeParameters()
         return 1
 
