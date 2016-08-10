@@ -298,6 +298,15 @@ class PartyLaps:
 
         self.table = ACTable(ac, self.window)
 
+        def onClickDriver(*args):
+            global currentDriver
+            currentDriver = cycleDriver(driversList, currentDriver)
+            writeParameters()
+            return 1
+
+        self.driverClickArea = ac.addLabel(self.window, "")
+        ac.addOnClickedListener(self.driverClickArea, onClickDriver)
+
 
     def draw(self):
         """
@@ -326,6 +335,8 @@ class PartyLaps:
 
         width, height = self.table.getDimensions()
         ac.setSize(self.window, width, height)
+        ac.setSize(self.driverClickArea, width, fontSize)
+        ac.setPosition(self.driverClickArea, 0, topPadding)
 
         self.table.setCellValue("Driver:", 0, 0)
 
@@ -349,15 +360,6 @@ class PartyLaps:
             self.table.setCellValue(refText, 0, self.refRowIndex)
         if showTotal:
             self.table.setCellValue("Tot.", 0, self.totRowIndex)
-
-        def onClickDriver(*args):
-            global currentDriver
-            currentDriver = cycleDriver(driversList, currentDriver)
-            writeParameters()
-            return 1
-
-        self.table.addOnClickedListener(0, 0, onClickDriver)
-        self.table.addOnClickedListener(1, 0, onClickDriver)
 
         self.setDriverCellValues()
 
