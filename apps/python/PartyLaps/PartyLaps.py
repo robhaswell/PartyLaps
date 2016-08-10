@@ -319,7 +319,7 @@ class PartyLaps:
         # Create the driver label and value holders
         self.table = ACTable(ac, self.window, 3, 22)
         self.table.setTablePadding(5, 0)
-        self.table.setCellSpacing(0)
+        self.table.setCellSpacing(0, 5)
         self.table.setColumnWidths(8, 5, 5)
         self.table.setColumnAlignments("left", "right", "right")
         self.table.setFontSize(fontSize)
