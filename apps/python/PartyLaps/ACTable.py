@@ -33,7 +33,7 @@ class ACTable(object):
         self.ac.console(repr(self.cells))
         for label in self.cells.values():
             self.ac.console("Setting label % to visibility 0" % (label,))
-            self.ac.setVisible(label, 0)
+            #self.ac.setVisible(label, 0)
 
         self.cells = {}
 
