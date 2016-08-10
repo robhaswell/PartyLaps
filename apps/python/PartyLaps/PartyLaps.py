@@ -328,8 +328,8 @@ class PartyLaps:
         self.driverLabel = (0, 0)
         self.driverValueLabel = (1, 0)
 
-        self.table.setCellValue(0, self.currLabelId, "Curr.")
-        self.table.setCellValue(0, self.totalLabelId, "Tot.")
+        self.table.setCellValue("Curr.", 0, self.currLabelId)
+        self.table.setCellValue("Tot.", 0, self.totalLabelId)
 
         def onClickDriver(*args):
             global currentDriver
