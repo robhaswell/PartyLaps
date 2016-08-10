@@ -98,8 +98,6 @@ if not unitTesting:
         ac.log("PartyLaps: Error importing libraries: %s" % e)
 
 
-initialized = False
-
 def acMain(ac_version):
     """
     Initialise the application.
@@ -113,8 +111,6 @@ def acMain(ac_version):
         global driversListText, driversList, currentDriver
         global trackName, trackConf, carName, bestLapFile
         global nurbTourist
-
-        global initialized
 
         if ac_version < 1.0:
             return "PartyLaps"
@@ -173,8 +169,6 @@ def acMain(ac_version):
         configApp.updateView()
 
         ac.addRenderCallback(partyLapsApp.window, onRenderCallback)
-
-        initialized = True
 
         return "PartyLaps"
     except Exception as e:
@@ -236,8 +230,6 @@ def acUpdate(deltaT):
     This function is called for every frame rendered. Instruct every app to
     update its view, if the time since the last update is great enough.
     """
-    if not initialized:
-        return
     try:
         global lastUpdateTime
         lastUpdateTime += deltaT

@@ -12,8 +12,8 @@ class ACTable(object):
         self.nColumns = nColumns
         self.nRows = nRows
 
-        self.data = [[]]
-        self.cells = [[]]
+        self.data = {}
+        self.cells = {}
 
 
     def initialize(self):
@@ -22,7 +22,7 @@ class ACTable(object):
         store cell data so that the cell information can be retrieved when
         redrawing due to a font size change.
         """
-        self.data = [[None]*self.nColumns]*self.nRows
+        self.data = {}
 
         # if self.ac is unavailable then we must be in a test and cannot
         # proceed.
@@ -30,11 +30,11 @@ class ACTable(object):
             return
 
         # Delete all existing labels
-        for row in self.cells:
-            for label in row:
-                self.ac.removeLabel(label)
+        for label in self.cells.items():
+            raise Exception("There were cells that needed to be removed.") # TODO
 
-        self.cells = [[None]*self.nColumns]*self.nRows
+        self.cells = {}
+
         for i in range(self.nColumns):
             for j in range(self.nRows):
                 label = self.ac.addLabel(self.window, "")
@@ -42,7 +42,7 @@ class ACTable(object):
                 self.ac.setPosition(label, *self._cellPosition(i, j))
                 self.ac.setFontSize(label, self.fontSize)
                 self.ac.setFontAlignment(label, self.columnAlignments[i])
-                self.cells[j][i] = label
+                self.cells[(i, j)] = label
 
 
     def setFontSize(self, fontSize):
@@ -100,8 +100,9 @@ class ACTable(object):
         """
         Set the cell text at position iX,iY.
         """
-        self.ac.setText(self.cells[iY][iX], text)
+        self.ac.setText(self.getCellLabel(iX, iY), text)
+        self.data[(iX, iY)] = text
 
 
     def getCellLabel(self, iX, iY):
-        return self.cells[iY][iX]
+        return self.cells[(iX, iY)]
