@@ -326,8 +326,14 @@ class PartyLaps:
         self.driverLabel = (0, 0)
         self.driverValueLabel = (1, 0)
 
-        self.table.addOnClickedListener(0, 0, self.onClickDriver)
-        self.table.addOnClickedListener(1, 0, self.onClickDriver)
+        def onClickDriver(*args):
+            global currentDriver
+            currentDriver = cycleDriver(driversList, currentDriver)
+            writeParameters()
+            return 1
+
+        self.table.addOnClickedListener(0, 0, onClickDriver)
+        self.table.addOnClickedListener(1, 0, onClickDriver)
 
         self.setDriverCellValues()
 
@@ -723,12 +729,6 @@ class PartyLaps:
         else:
             ac.setFontColor(self.timeLabel[self.currLabelId], 1, 1, 1, 1)
 
-
-    def onClickDriver(self, *args):
-        global currentDriver
-        currentDriver = cycleDriver(driversList, currentDriver)
-        writeParameters()
-        return 1
 
 
     def writeSession(self):
