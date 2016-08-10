@@ -106,3 +106,7 @@ class ACTable(object):
 
     def getCellLabel(self, iX, iY):
         return self.cells[(iX, iY)]
+
+
+    def addOnClickedListener(self, iX, iY, callback):
+        self.ac.addOnClickedListener(self.getCellLabel(iX, iY), callback)
