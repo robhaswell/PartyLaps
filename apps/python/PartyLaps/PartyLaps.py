@@ -297,7 +297,8 @@ class PartyLaps:
         self.readBestLap()
 
         self.table = ACTable(ac, self.window)
-    
+
+
     def draw(self):
         """
         Redraw the whole window. This must be done whenever the table geometry

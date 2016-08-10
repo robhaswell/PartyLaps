@@ -11,7 +11,6 @@ class ACTable(object):
         self.setTablePadding(0, 0)
         self.setCellSpacing(0, 0)
 
-        self.data = {}
         self.cells = {}
 
 
@@ -21,18 +20,13 @@ class ACTable(object):
         store cell data so that the cell information can be retrieved when
         redrawing due to a font size change.
         """
-        self.ac.console("Drawing table")
-        self.data = {}
-
         # if self.ac is unavailable then we must be in a test and cannot
         # proceed.
         if self.ac is None:
             return
 
         # Delete all existing labels
-        self.ac.console(repr(self.cells))
         for label in self.cells.values():
-            self.ac.console("Setting label %s to visibility 0" % (label,))
             self.ac.setVisible(label, 0)
 
         self.cells = {}
@@ -112,7 +106,6 @@ class ACTable(object):
         Set the cell text at position iX,iY.
         """
         self.ac.setText(self.getCellLabel(iX, iY), text)
-        self.data[(iX, iY)] = text
 
     
     def setFontColor(self, r, g, b, s, iX, iY):
