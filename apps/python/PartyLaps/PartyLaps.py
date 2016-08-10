@@ -618,34 +618,35 @@ class PartyLaps:
         Refresh the laps and the total.
         """
         for index in range(lapDisplayedCount):
+            rowIndex = index + 1
             lapIndex = index
             if len(self.laps) > lapDisplayedCount:
                 lapIndex += len(self.laps)-lapDisplayedCount
 
             # Refresh lap number
             if (self.pitExitLap > 0) and (self.pitExitLap <= lapIndex < self.lapDone):
-                self.table.setCellValue("{0}. ({1})".format(lapIndex+1, lapIndex-self.pitExitLap+1), 0, index)
+                self.table.setCellValue("{0}. ({1})".format(lapIndex+1, lapIndex-self.pitExitLap+1), 0, rowIndex)
             else:
-                self.table.setCellValue("%d." % (lapIndex+1), 0, index)
+                self.table.setCellValue("%d." % (lapIndex+1), 0, rowIndex)
 
             # Refresh lap times and deltas
             if lapIndex < len(self.laps):
-                self.table.setCellValue(timeToString(self.laps[lapIndex]), 1, index)
+                self.table.setCellValue(timeToString(self.laps[lapIndex]), 1, rowIndex)
 
                 # Best lap in green
                 if self.laps[lapIndex] == self.bestLapAc:
-                    self.table.setFontColor(0, 1, 0, 1, 1, index)
+                    self.table.setFontColor(0, 1, 0, 1, 1, rowIndex)
                 else:
-                    self.table.setFontColor(1, 1, 1, 1, 1, index)
+                    self.table.setFontColor(1, 1, 1, 1, 1, rowIndex)
 
                 # Refresh delta label
-                setDelta(self.table.getCellLabel(2, self.index), self.laps[lapIndex] - self.referenceTime, self.deltaApp)
+                setDelta(self.table.getCellLabel(2, self.rowIndex), self.laps[lapIndex] - self.referenceTime, self.deltaApp)
 
             else:
-                self.table.setCellValue(timeToString(0), 1, index)
-                self.table.setFontColor(1, 1, 1, 1, 1, index)
-                self.table.setCellValue("-.---", 2, index)
-                self.table.setFontColor(1, 1, 1, 1, 2, index)
+                self.table.setCellValue(timeToString(0), 1, rowIndex)
+                self.table.setFontColor(1, 1, 1, 1, 1, rowIndex)
+                self.table.setCellValue("-.---", 2, rowIndex)
+                self.table.setFontColor(1, 1, 1, 1, 2, rowIndex)
 
         # Refresh Total
         self.table.setCellValue(timeToString(self.total), 1, self.totRowIndex)
