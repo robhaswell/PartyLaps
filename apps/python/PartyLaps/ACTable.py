@@ -53,7 +53,7 @@ class ACTable(object):
         """
         Return the width,height dimensions of the table.
         """
-        width = sum(self.columnWidths) + max(self.nColumns-1, 0) * self.spacingX
+        width = sum(self.columnWidths) * self.fontSize + max(self.nColumns-1, 0) * self.spacingX
         height = self.paddingY + (self.fontSize + self.spacingY) * self.nRows
         return (width, height)
 
