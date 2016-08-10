@@ -270,9 +270,6 @@ class PartyLaps:
         self.deltaApp = deltaApp
         self.window = ac.newApp(name)
 
-        self.lapNumberLabel = []
-        self.timeLabel = []
-        self.deltaLabel = []
         self.lastLapDataRefreshed = -1
         self.lastLapViewRefreshed = 0
         self.total = 0
@@ -299,27 +296,47 @@ class PartyLaps:
 
         self.readBestLap()
 
-        self.refLabelId = lapLabelCount+1
-        self.totalLabelId = lapLabelCount+2
+        self.table = ACTable(ac, self.window)
+    
+    def draw(self):
+        """
+        Redraw the whole window. This must be done whenever the table geometry
+        changes.
+        """
+        tableRows = 1 + lapDisplayedCount + showCurrent + showReference + showTotal
 
-        # Create the driver label and value holders
-        self.table = ACTable(ac, self.window, 3, 22) # TODO 22 is not right
+        self.table.setSize(3, tableRows)
         self.table.setTablePadding(5, 0)
         self.table.setCellSpacing(0, 5)
         self.table.setColumnWidths(2, 5, 5)
         self.table.setColumnAlignments("left", "right", "right")
         self.table.setFontSize(fontSize)
-        self.table.initialize()
+
+        self.table.draw()
 
         self.driverLabel = (0, 0)
         self.driverValueLabel = (1, 0)
 
-        self.currRowIndex = lapDisplayedCount + 1
-        self.refRowIndex = lapDisplayedCount + 2
-        self.totRowIndex = lapDisplayedCount + 3
+        self.currRowIndex = lapDisplayedCount + showCurrent
+        self.refRowIndex = lapDisplayedCount + showCurrent + showReference
+        self.totRowIndex = lapDisplayedCount + showCurrent + showReference + showTotal
 
-        self.table.setCellValue("Curr.", 0, self.currRowIndex)
-        self.table.setCellValue("Tot.", 0, self.totRowIndex)
+        if showCurrent:
+            self.table.setCellValue("Curr.", 0, self.currRowIndex)
+        if showReference:
+            if reference == "best":
+                refText = "Best"
+            elif reference == "median":
+                refText = "Med."
+            elif reference == "top25":
+                refText = "25%"
+            elif reference == "top50":
+                refText = "50%"
+            elif reference == "top75":
+                refText = "75%"
+            self.table.setCellValue(refText, 0, self.refRowIndex)
+        if showTotal:
+            self.table.setCellValue("Tot.", 0, self.totRowIndex)
 
         def onClickDriver(*args):
             global currentDriver
@@ -361,32 +378,8 @@ class PartyLaps:
 
         ac.setSize(self.window, self.width, self.height)
 
-        self.setDriverCellValues()
-
-        for labelIndex in range(lapLabelCount+3):
-            rowIndex = labelIndex + 1
-
-        rowIndex = lapDisplayedCount + 1
-
-        rowIndex += showCurrent
-
-        # Reference time name and position
-        if reference == "best":
-            refText = "Best"
-        elif reference == "median":
-            refText = "Med."
-        elif reference == "top25":
-            refText = "25%"
-        elif reference == "top50":
-            refText = "50%"
-        elif reference == "top75":
-            refText = "75%"
-
-        self.table.setCellValue(refText, 0, self.refRowIndex)
-
-        rowIndex += showReference
-
         # Force full refresh
+        self.draw()
         self.updateDataFast()
         self.updateDataRef()
         self.updateViewFast()
@@ -589,6 +582,7 @@ class PartyLaps:
             elif reference == "top75":
                 self.referenceTime = self.getTopAvg(75, lapsSorted)
 
+
     def getTopAvg(self, topPercent, lapsSorted):
         count = int((len(lapsSorted) + len(lapsSorted)%2)*topPercent/100)
 
@@ -640,7 +634,8 @@ class PartyLaps:
                     self.table.setFontColor(1, 1, 1, 1, 1, rowIndex)
 
                 # Refresh delta label
-                setDelta(self.table.getCellLabel(2, self.rowIndex), self.laps[lapIndex] - self.referenceTime, self.deltaApp)
+                setDelta(self.table.getCellLabel(2, self.rowIndex),
+                        self.laps[lapIndex] - self.referenceTime, self.deltaApp)
 
             else:
                 self.table.setCellValue(timeToString(0), 1, rowIndex)
@@ -659,6 +654,7 @@ class PartyLaps:
 
         self.lastLapViewRefreshed = self.lastLapDataRefreshed
 
+
     def updateViewFast(self):
         """
         Refresh current lap projection and performance.
@@ -666,9 +662,11 @@ class PartyLaps:
         if self.sfCrossed and len(self.bestLapData) > 0 and info.graphics.status != 1 and self.position > 0.00001:
             self.table.setCellValue(timeToString(self.projection), 1, self.currRowIndex)
             if self.pitExitState == PIT_EXIT_STATE_APPLY_OFFSET:
-                setDelta(self.table.getCellLabel(2, self.currRowIndex), self.performance-self.pitExitDeltaOffset, self.deltaApp)
+                setDelta(self.table.getCellLabel(2, self.currRowIndex),
+                        self.performance-self.pitExitDeltaOffset, self.deltaApp)
             else:
-                setDelta(self.table.getCellLabel(2, self.currRowIndex), self.performance, self.deltaApp)
+                setDelta(self.table.getCellLabel(2, self.currRowIndex),
+                        self.performance, self.deltaApp)
         else:
             self.table.setCellValue(timeToString(self.currentTime), 1, self.currRowIndex)
             self.table.setCellValue("-.---", 2, self.currRowIndex)

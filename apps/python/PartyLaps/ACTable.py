@@ -4,19 +4,18 @@ A table drawing utility for Assetto Corsa.
 
 class ACTable(object):
 
-    def __init__(self, ac, window, nColumns, nRows):
+    def __init__(self, ac, window):
         self.ac = ac
         self.window = window
-        self.paddingX = 0
-        self.paddingY = 0
-        self.nColumns = nColumns
-        self.nRows = nRows
+
+        self.setTablePadding(0, 0)
+        self.setCellSpacing(0, 0)
 
         self.data = {}
         self.cells = {}
 
 
-    def initialize(self):
+    def draw(self):
         """
         Initialise the data storage array and label array. We are required to
         store cell data so that the cell information can be retrieved when
@@ -31,7 +30,7 @@ class ACTable(object):
 
         # Delete all existing labels
         for label in self.cells.items():
-            raise Exception("There were cells that needed to be removed.") # TODO
+            self.ac.setVisible(label, False)
 
         self.cells = {}
 
@@ -43,6 +42,14 @@ class ACTable(object):
                 self.ac.setFontSize(label, self.fontSize)
                 self.ac.setFontAlignment(label, self.columnAlignments[i])
                 self.cells[(i, j)] = label
+
+
+    def setSize(self, nColumns, nRows):
+        """
+        Set the size of the table in columns and rows.
+        """
+        self.nColumns = nColumns
+        self.nRows = nRows
 
 
     def setFontSize(self, fontSize):
