@@ -113,7 +113,11 @@ class ACTable(object):
 
 
     def getCellLabel(self, iX, iY):
-        return self.cells[(iX, iY)]
+        try:
+            return self.cells[(iX, iY)]
+        except KeyError:
+            self.ac.log(self.cells)
+            raise ValueError("Cell not found: (%s,%s)" % (iX, iY))
 
 
     def addOnClickedListener(self, iX, iY, callback):
