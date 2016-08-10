@@ -94,8 +94,6 @@ class ACTable(object):
         """
         Return the (x,y) co-ordinates for a cell at position iX,iY.
         """
-        #self.ac.log(" ".join(map(str, [type(iX), type(iY), type(self.fontSize), type(self.spacing)])))
-        #self.ac.log(repr(self.columnWidths))
         x = self.paddingX + (sum(self.columnWidths[:iX]) * self.fontSize) + (iX * self.spacingX)
         y = self.paddingY + iY * (self.fontSize + self.spacingY)
         return (x, y)
