@@ -30,10 +30,10 @@ class ACTable(object):
             return
 
         # Delete all existing labels
-        #self.ac.console(repr(self.cells))
-        for index in self.cells:
-            self.ac.console("Setting label % to visibility 0" % (index,))
-            #self.ac.setVisible(label, 0)
+        self.ac.console(repr(self.cells))
+        for label in self.cells.values():
+            self.ac.console("Setting label %s to visibility 0" % (label,))
+            self.ac.setVisible(label, 0)
 
         self.cells = {}
 
