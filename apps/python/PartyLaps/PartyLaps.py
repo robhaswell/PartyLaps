@@ -368,7 +368,7 @@ class PartyLaps:
         """
         self.table.setCellValue(
                 currentDriver if currentDriver != "" else "OPEN CONFIG TO SET DRIVERS",
-                0, 1)
+                1, 0)
 
 
     def refreshParameters(self):
