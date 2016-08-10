@@ -317,16 +317,19 @@ class PartyLaps:
         ac.setText(self.lapNumberLabel[self.totalLabelId], "Tot.")
 
         # Create the driver label and value holders
-        self.table = ACTable(ac, self.window, 3, 1)
+        self.table = ACTable(ac, self.window, 3, 22)
         self.table.setTablePadding(5, 0)
         self.table.setCellSpacing(0)
-        self.table.setColumnWidths(2, 5, 5)
+        self.table.setColumnWidths(8, 5, 5)
         self.table.setColumnAlignments("left", "right", "right")
         self.table.setFontSize(fontSize)
         self.table.initialize()
 
         self.driverLabel = (0, 0)
         self.driverValueLabel = (1, 0)
+
+        self.table.setCellValue(0, self.currLabelId, "Curr.")
+        self.table.setCellValue(0, self.totalLabelId, "Tot.")
 
         def onClickDriver(*args):
             global currentDriver
