@@ -404,15 +404,17 @@ class PartyLaps:
 
         # Reference time name and position
         if reference == "best":
-            ac.setText(self.lapNumberLabel[self.refLabelId], "Best")
+            refText = "Best"
         elif reference == "median":
-            ac.setText(self.lapNumberLabel[self.refLabelId], "Med.")
+            refText = "Med."
         elif reference == "top25":
-            ac.setText(self.lapNumberLabel[self.refLabelId], "25%")
+            refText = "25%"
         elif reference == "top50":
-            ac.setText(self.lapNumberLabel[self.refLabelId], "50%")
+            refText = "50%"
         elif reference == "top75":
-            ac.setText(self.lapNumberLabel[self.refLabelId], "75%")
+            refText = "75%"
+
+        self.table.setCellValue(refText, 0, self.refRowIndex)
 
         ac.setVisible(self.lapNumberLabel[self.refLabelId], showReference)
         ac.setVisible(self.timeLabel[self.refLabelId], showReference)
