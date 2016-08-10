@@ -21,6 +21,7 @@ class ACTable(object):
         store cell data so that the cell information can be retrieved when
         redrawing due to a font size change.
         """
+        self.ac.console("Drawing table")
         self.data = {}
 
         # if self.ac is unavailable then we must be in a test and cannot
@@ -29,6 +30,7 @@ class ACTable(object):
             return
 
         # Delete all existing labels
+        self.ac.console(repr(self.cells))
         for label in self.cells.items():
             self.ac.console("Setting label % to visibility 0" % (label,))
             self.ac.setVisible(label, 0)
