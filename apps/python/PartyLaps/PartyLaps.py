@@ -264,6 +264,8 @@ def onRenderCallback(deltaT):
 class PartyLaps:
 
     def __init__(self, name, headerName, deltaApp):
+        global currentDriver
+
         self.headerName = headerName
         self.deltaApp = deltaApp
         self.window = ac.newApp(name)
