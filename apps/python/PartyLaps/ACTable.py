@@ -57,11 +57,12 @@ class ACTable(object):
         self.paddingY = paddingY
 
 
-    def setCellSpacing(self, spacing):
+    def setCellSpacing(self, spacingX, spacingY):
         """
         Set the pixel amount of spacing between each cell.
         """
-        self.spacing = spacing
+        self.spacingX = spacingX
+        self.spacingY = spacingY
 
 
     def setColumnWidths(self, *columnWidths):
@@ -91,8 +92,8 @@ class ACTable(object):
         """
         #self.ac.log(" ".join(map(str, [type(iX), type(iY), type(self.fontSize), type(self.spacing)])))
         #self.ac.log(repr(self.columnWidths))
-        x = self.paddingX + (sum(self.columnWidths[:iX]) * self.fontSize) + (iX * self.spacing)
-        y = self.paddingY + (iY * self.fontSize) + (iY * self.spacing)
+        x = self.paddingX + (sum(self.columnWidths[:iX]) * self.fontSize) + (iX * self.spacingX)
+        y = self.paddingY + (iY * self.fontSize * 1.5 + self.spacingY)
         return (x, y)
 
 
