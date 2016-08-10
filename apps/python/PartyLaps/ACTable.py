@@ -49,6 +49,15 @@ class ACTable(object):
         self.nRows = nRows
 
 
+    def getDimensions(self):
+        """
+        Return the width,height dimensions of the table.
+        """
+        width = sum(self.columnWidths) + max(self.nColumns-1, 0) * self.spacingX
+        height = self.paddingY + (self.fontSize + self.spacingY) * self.nRows
+        return (width, height)
+
+
     def setFontSize(self, fontSize):
         self.fontSize = fontSize
 

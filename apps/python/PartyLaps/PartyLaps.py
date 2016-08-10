@@ -63,7 +63,7 @@ configApp = 0
 
 # Display global settings
 spacing = 5
-firstSpacing = 30
+topPadding = 30
 fontSizeConfig = 18
 lapLabelCount = 50
 
@@ -304,16 +304,28 @@ class PartyLaps:
         Redraw the whole window. This must be done whenever the table geometry
         changes.
         """
+        if showHeader:
+            ac.setTitle(self.window, self.headerName)
+            ac.setIconPosition(self.window, 0, 0)
+            topPadding = 30
+        else:
+            ac.setTitle(self.window, "")
+            ac.setIconPosition(self.window, -10000, -10000)
+            topPadding = 0
+
         tableRows = 1 + lapDisplayedCount + showCurrent + showReference + showTotal
 
         self.table.setSize(3, tableRows)
-        self.table.setTablePadding(5, 0)
+        self.table.setTablePadding(5, topPadding)
         self.table.setCellSpacing(0, 5)
         self.table.setColumnWidths(2, 5, 5)
         self.table.setColumnAlignments("left", "right", "right")
         self.table.setFontSize(fontSize)
 
         self.table.draw()
+
+        width, height = self.table.getDimensions()
+        ac.setSize(self.window, width, height)
 
         self.table.setCellValue("Driver:", 0, 0)
 
@@ -360,24 +372,6 @@ class PartyLaps:
 
 
     def refreshParameters(self):
-        if showHeader:
-            ac.setTitle(self.window, self.headerName)
-            ac.setIconPosition(self.window, 0, 0)
-            self.firstSpacing = firstSpacing
-        else:
-            ac.setTitle(self.window, "")
-            ac.setIconPosition(self.window, -10000, -10000)
-            self.firstSpacing = 0
-
-        widthNumber     = fontSize*2
-        widthTime       = fontSize*5
-        widthDelta      = fontSize*5
-
-        self.width  = widthNumber + widthTime + widthDelta*showDelta + 2*spacing
-        self.height = self.firstSpacing + (fontSize + spacing)*(lapDisplayedCount + showCurrent + showTotal + showReference + 1) # TODO
-
-        ac.setSize(self.window, self.width, self.height)
-
         # Force full refresh
         self.draw()
         self.updateDataFast()
@@ -811,10 +805,10 @@ class PartyLaps_config:
         if showHeader == 1:
             ac.setTitle(self.window, "")
             ac.setIconPosition(self.window, -10000, -10000)
-            self.firstSpacing = 0
+            self.topPadding = 0
         else:
             ac.setTitle(self.window, headerName)
-            self.firstSpacing = firstSpacing
+            self.topPadding = topPadding
 
         self.fontSize = fontSize
 
@@ -822,7 +816,7 @@ class PartyLaps_config:
         widthCenter     = fontSize*5
         widthRight      = fontSize*5
         self.width      = widthLeft + widthCenter + widthRight + 2*spacing
-        height          = self.firstSpacing + (fontSize*1.5 + spacing)*22
+        height          = self.topPadding + (fontSize*1.5 + spacing)*22
 
         ac.setSize(self.window, self.width, height)
 
@@ -835,29 +829,29 @@ class PartyLaps_config:
         for index in range(21):
             self.leftLabel.append(ac.addLabel(self.window, ""))
             ac.setFontSize(self.leftLabel[index], fontSize)
-            ac.setPosition(self.leftLabel[index], spacing, self.firstSpacing + index*(fontSize*1.5+spacing))
+            ac.setPosition(self.leftLabel[index], spacing, self.topPadding + index*(fontSize*1.5+spacing))
             ac.setSize(self.leftLabel[index], widthLeft, fontSize+spacing)
             ac.setFontAlignment(self.leftLabel[index], 'left')
 
             self.centerLabel.append(ac.addLabel(self.window, ""))
             ac.setFontSize(self.centerLabel[index], fontSize)
-            ac.setPosition(self.centerLabel[index], spacing + widthLeft, self.firstSpacing + index*(fontSize*1.5+spacing))
+            ac.setPosition(self.centerLabel[index], spacing + widthLeft, self.topPadding + index*(fontSize*1.5+spacing))
             ac.setSize(self.centerLabel[index], widthCenter, fontSize+spacing)
             ac.setFontAlignment(self.centerLabel[index], 'left')
 
             self.changeButton.append(ac.addButton(self.window, "Change"))
             ac.setFontSize(self.changeButton[index], self.fontSize)
-            ac.setPosition(self.changeButton[index], spacing + widthLeft + widthCenter, self.firstSpacing + index*(fontSize*1.5+spacing))
+            ac.setPosition(self.changeButton[index], spacing + widthLeft + widthCenter, self.topPadding + index*(fontSize*1.5+spacing))
             ac.setSize(self.changeButton[index], fontSize*4, fontSize*1.5)
 
             self.plusButton.append(ac.addButton(self.window, "+"))
             ac.setFontSize(self.plusButton[index], self.fontSize)
-            ac.setPosition(self.plusButton[index], spacing + widthLeft + widthCenter, self.firstSpacing + index*(fontSize*1.5+spacing))
+            ac.setPosition(self.plusButton[index], spacing + widthLeft + widthCenter, self.topPadding + index*(fontSize*1.5+spacing))
             ac.setSize(self.plusButton[index], fontSize*1.5, fontSize*1.5)
 
             self.minusButton.append(ac.addButton(self.window, "-"))
             ac.setFontSize(self.minusButton[index], self.fontSize)
-            ac.setPosition(self.minusButton[index], spacing + widthLeft + widthCenter + fontSize*2.5, self.firstSpacing + index*(fontSize*1.5+spacing))
+            ac.setPosition(self.minusButton[index], spacing + widthLeft + widthCenter + fontSize*2.5, self.topPadding + index*(fontSize*1.5+spacing))
             ac.setSize(self.minusButton[index], fontSize*1.5, fontSize*1.5)
 
         rowIndex = 0
@@ -1031,7 +1025,7 @@ class PartyLaps_config:
         self.driversInput = ac.addTextInput(self.window, driversListText)
         ac.setText(self.driversInput, driversListText)
         ac.setFontSize(self.driversInput, self.fontSize)
-        ac.setPosition(self.driversInput, spacing, self.firstSpacing + rowIndex*(fontSize*1.5+spacing))
+        ac.setPosition(self.driversInput, spacing, self.topPadding + rowIndex*(fontSize*1.5+spacing))
         ac.setSize(self.driversInput, widthLeft + widthCenter + widthRight, fontSize*1.5)
 
 
