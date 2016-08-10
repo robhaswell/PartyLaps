@@ -302,18 +302,8 @@ class PartyLaps:
         self.refLabelId = lapLabelCount+1
         self.totalLabelId = lapLabelCount+2
 
-        for index in range(lapLabelCount+3):
-            self.lapNumberLabel.append(ac.addLabel(self.window, "%d." % (index+1)))
-            ac.setFontAlignment(self.lapNumberLabel[index], 'left')
-
-            self.timeLabel.append(ac.addLabel(self.window, timeToString(0)))
-            ac.setFontAlignment(self.timeLabel[index], 'right')
-
-            self.deltaLabel.append(ac.addLabel(self.window, "-.---"))
-            ac.setFontAlignment(self.deltaLabel[index], 'right')
-
         # Create the driver label and value holders
-        self.table = ACTable(ac, self.window, 3, 22)
+        self.table = ACTable(ac, self.window, 3, 22) # TODO 22 is not right
         self.table.setTablePadding(5, 0)
         self.table.setCellSpacing(0, 5)
         self.table.setColumnWidths(2, 5, 5)
@@ -367,7 +357,7 @@ class PartyLaps:
         widthDelta      = fontSize*5
 
         self.width  = widthNumber + widthTime + widthDelta*showDelta + 2*spacing
-        self.height = self.firstSpacing + (fontSize + spacing)*(lapDisplayedCount + showCurrent + showTotal + showReference + 1)
+        self.height = self.firstSpacing + (fontSize + spacing)*(lapDisplayedCount + showCurrent + showTotal + showReference + 1) # TODO
 
         ac.setSize(self.window, self.width, self.height)
 
@@ -375,28 +365,6 @@ class PartyLaps:
 
         for labelIndex in range(lapLabelCount+3):
             rowIndex = labelIndex + 1
-
-            ac.setFontSize(self.lapNumberLabel[labelIndex], fontSize)
-            ac.setPosition(self.lapNumberLabel[labelIndex], spacing, self.firstSpacing + rowIndex*(fontSize+spacing))
-            ac.setSize(self.lapNumberLabel[labelIndex], widthNumber, fontSize+spacing)
-
-            ac.setFontSize(self.timeLabel[labelIndex], fontSize)
-            ac.setPosition(self.timeLabel[labelIndex], spacing + widthNumber, self.firstSpacing + rowIndex*(fontSize+spacing))
-            ac.setSize(self.timeLabel[labelIndex], widthTime, fontSize+spacing)
-
-            ac.setFontSize(self.deltaLabel[labelIndex], fontSize)
-            ac.setPosition(self.deltaLabel[labelIndex], spacing + widthNumber + widthTime, self.firstSpacing + rowIndex*(fontSize+spacing))
-            ac.setSize(self.deltaLabel[labelIndex], widthTime, fontSize+spacing)
-
-        for index in range(lapLabelCount):
-            if index < lapDisplayedCount:
-                ac.setVisible(self.lapNumberLabel[index], 1)
-                ac.setVisible(self.timeLabel[index], 1)
-                ac.setVisible(self.deltaLabel[index], showDelta)
-            else:
-                ac.setVisible(self.lapNumberLabel[index], 0)
-                ac.setVisible(self.timeLabel[index], 0)
-                ac.setVisible(self.deltaLabel[index], 0)
 
         rowIndex = lapDisplayedCount + 1
 
@@ -416,24 +384,7 @@ class PartyLaps:
 
         self.table.setCellValue(refText, 0, self.refRowIndex)
 
-        ac.setVisible(self.lapNumberLabel[self.refLabelId], showReference)
-        ac.setVisible(self.timeLabel[self.refLabelId], showReference)
-        ac.setVisible(self.deltaLabel[self.refLabelId], showReference)
-
-        ac.setPosition(self.lapNumberLabel[self.refLabelId], spacing, self.firstSpacing + rowIndex*(fontSize+spacing))
-        ac.setPosition(self.timeLabel[self.refLabelId], spacing + widthNumber, self.firstSpacing + rowIndex*(fontSize+spacing))
-        ac.setPosition(self.deltaLabel[self.refLabelId], spacing + widthNumber + widthTime, self.firstSpacing + rowIndex*(fontSize+spacing))
-
         rowIndex += showReference
-
-        # Total time position
-        ac.setVisible(self.lapNumberLabel[self.totalLabelId], showTotal)
-        ac.setVisible(self.timeLabel[self.totalLabelId], showTotal)
-        ac.setVisible(self.deltaLabel[self.totalLabelId], 0)
-
-        ac.setPosition(self.lapNumberLabel[self.totalLabelId], spacing, self.firstSpacing + rowIndex*(fontSize+spacing))
-        ac.setPosition(self.timeLabel[self.totalLabelId], spacing + widthNumber, self.firstSpacing + rowIndex*(fontSize+spacing))
-        ac.setPosition(self.deltaLabel[self.totalLabelId], spacing + widthNumber + widthTime, self.firstSpacing + rowIndex*(fontSize+spacing))
 
         # Force full refresh
         self.updateDataFast()
