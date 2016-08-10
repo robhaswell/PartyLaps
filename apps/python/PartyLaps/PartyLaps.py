@@ -299,7 +299,6 @@ class PartyLaps:
 
         self.readBestLap()
 
-        self.currLabelId = lapLabelCount
         self.refLabelId = lapLabelCount+1
         self.totalLabelId = lapLabelCount+2
 
@@ -312,9 +311,6 @@ class PartyLaps:
 
             self.deltaLabel.append(ac.addLabel(self.window, "-.---"))
             ac.setFontAlignment(self.deltaLabel[index], 'right')
-
-        ac.setText(self.lapNumberLabel[self.currLabelId],  "Curr.")
-        ac.setText(self.lapNumberLabel[self.totalLabelId], "Tot.")
 
         # Create the driver label and value holders
         self.table = ACTable(ac, self.window, 3, 22)
@@ -402,15 +398,6 @@ class PartyLaps:
                 ac.setVisible(self.deltaLabel[index], 0)
 
         rowIndex = lapDisplayedCount + 1
-
-        # Current time position
-        ac.setPosition(self.lapNumberLabel[self.currLabelId], spacing, self.firstSpacing + rowIndex*(fontSize+spacing))
-        ac.setPosition(self.timeLabel[self.currLabelId], spacing + widthNumber, self.firstSpacing + rowIndex*(fontSize+spacing))
-        ac.setPosition(self.deltaLabel[self.currLabelId], spacing + widthNumber + widthTime, self.firstSpacing + rowIndex*(fontSize+spacing))
-
-        ac.setVisible(self.lapNumberLabel[self.currLabelId], showCurrent)
-        ac.setVisible(self.timeLabel[self.currLabelId], showCurrent)
-        ac.setVisible(self.deltaLabel[self.currLabelId], showCurrent and showDelta)
 
         rowIndex += showCurrent
 
@@ -722,21 +709,20 @@ class PartyLaps:
         Refresh current lap projection and performance.
         """
         if self.sfCrossed and len(self.bestLapData) > 0 and info.graphics.status != 1 and self.position > 0.00001:
-            ac.setText(self.timeLabel[self.currLabelId], timeToString(self.projection))
+            self.table.setCellValue(timeToString(self.projection), 1, self.currLabelIndex)
             if self.pitExitState == PIT_EXIT_STATE_APPLY_OFFSET:
-                setDelta(self.deltaLabel[self.currLabelId], self.performance-self.pitExitDeltaOffset, self.deltaApp)
+                setDelta(self.table.getCellLabel(2, self.currLabelIndex), self.performance-self.pitExitDeltaOffset, self.deltaApp)
             else:
-                setDelta(self.deltaLabel[self.currLabelId], self.performance, self.deltaApp)
+                setDelta(self.table.getCellLabel(2, self.currLabelIndex), self.performance, self.deltaApp)
         else:
-            ac.setText(self.timeLabel[self.currLabelId], timeToString(self.currentTime))
-            ac.setText(self.deltaLabel[self.currLabelId], "-.---")
-            ac.setFontColor(self.deltaLabel[self.currLabelId], 1, 1, 1, 1)
+            self.table.setCellValue(timeToString(self.currentTime), 1, self.currLabelIndex)
+            self.table.setCellValue("-.---", 2, self.currLabelIndex)
+            self.table.setFontColor(1, 1, 1, 1, self.currLabelIndex, 2)
 
         if self.lapInvalidated:
-            ac.setFontColor(self.timeLabel[self.currLabelId], 1, 0, 0, 1)
+            self.table.setFontColor(1, 0, 0, 1, self.currLabelIndex, 1)
         else:
-            ac.setFontColor(self.timeLabel[self.currLabelId], 1, 1, 1, 1)
-
+            self.table.setFontColor(1, 1, 1, 1, self.currLabelIndex, 1)
 
 
     def writeSession(self):
