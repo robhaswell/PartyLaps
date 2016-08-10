@@ -104,6 +104,13 @@ class ACTable(object):
         self.ac.setText(self.getCellLabel(iX, iY), text)
         self.data[(iX, iY)] = text
 
+    
+    def setFontColor(self, r, g, b, s, iX, iY):
+        """
+        Set the font color of the cell at iX,iY.
+        """
+        self.ac.setFontColor(self.getCellLabel(iX, iY), r, g, b, s)
+
 
     def getCellLabel(self, iX, iY):
         return self.cells[(iX, iY)]
