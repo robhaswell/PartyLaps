@@ -717,12 +717,12 @@ class PartyLaps:
         else:
             self.table.setCellValue(timeToString(self.currentTime), 1, self.currLabelIndex)
             self.table.setCellValue("-.---", 2, self.currLabelIndex)
-            self.table.setFontColor(1, 1, 1, 1, self.currLabelIndex, 2)
+            self.table.setFontColor(1, 1, 1, 1, 2, self.currLabelIndex)
 
         if self.lapInvalidated:
-            self.table.setFontColor(1, 0, 0, 1, self.currLabelIndex, 1)
+            self.table.setFontColor(1, 0, 0, 1, 1, self.currLabelIndex)
         else:
-            self.table.setFontColor(1, 1, 1, 1, self.currLabelIndex, 1)
+            self.table.setFontColor(1, 1, 1, 1, 1, self.currLabelIndex)
 
 
     def writeSession(self):

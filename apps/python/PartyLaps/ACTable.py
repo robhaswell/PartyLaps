@@ -116,7 +116,6 @@ class ACTable(object):
         try:
             return self.cells[(iX, iY)]
         except KeyError:
-            self.ac.log(repr(self.cells))
             raise ValueError("Cell not found: (%s,%s)" % (iX, iY))
 
 
