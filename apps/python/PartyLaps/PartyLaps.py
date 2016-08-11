@@ -378,7 +378,7 @@ class PartyLaps:
         """
         Display the correct personal best.
         """
-        self.table.setCellValue(timeToString(self.personalBest()), 0, self.pbRowIndex)
+        self.table.setCellValue(timeToString(self.personalBest()), 1, self.pbRowIndex)
 
 
     def refreshParameters(self):
