@@ -1437,6 +1437,7 @@ def explodeCSL(string, sep=','):
 
 
 def onClickDriver(*args):
+    # Callbacks must be first-order functions in the main file :-/
     global currentDriver
     currentDriver = cycleDriver(driversList, currentDriver)
     writeParameters()
