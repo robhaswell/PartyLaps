@@ -1108,6 +1108,11 @@ class PartyDelta(object):
         ac.setFontSize(self.deltaLabel, self.fontSize)
         ac.setFontAlignment(self.deltaLabel, "center")
 
+        def onClick(a1, a2):
+            ac.console("Clicked delta")
+
+        ac.addOnClickedListener(self.deltaLabel, onClick)
+
 
     def onRenderCallback(self):
         """
