@@ -319,7 +319,7 @@ class PartyLaps:
             self.ac.setIconPosition(self.window, -10000, -10000)
             topPadding = 0
 
-        tableRows = 1 + lapDisplayedCount + showCurrent + showReference + showTotal
+        tableRows = 1 + lapDisplayedCount + showCurrent + showReference + 1 + showTotal
 
         self.table.setSize(3, tableRows)
         self.table.setTablePadding(5, topPadding)
