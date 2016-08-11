@@ -356,7 +356,6 @@ class PartyLaps:
                 refText = "75%"
             self.table.setCellValue(refText, 0, self.refRowIndex)
         self.table.setCellValue("Pers.", 0, self.pbRowIndex)
-        self.table.setCellValue("-:--.---", 1, self.pbRowIndex)
         self.table.setCellValue("-.---", 2, self.pbRowIndex)
         if showTotal:
             self.table.setCellValue("Tot.", 0, self.totRowIndex)
@@ -365,6 +364,7 @@ class PartyLaps:
         self.table.addOnClickedListener(1, 0, onClickDriver)
 
         self.setDriverCellValues()
+        self.setPersonalBestCellValues()
 
 
     def setDriverCellValues(self):
