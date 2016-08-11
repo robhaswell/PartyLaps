@@ -351,7 +351,7 @@ class PartyLaps:
             self.table.setCellValue("Tot.", 0, self.totRowIndex)
 
         self.table.addOnClickedListener(0, 0, onClickDriver)
-        self.table.addOnClickedListener(0, 1, onClickDriver)
+        self.table.addOnClickedListener(1, 0, onClickDriver)
 
         self.setDriverCellValues()
 
