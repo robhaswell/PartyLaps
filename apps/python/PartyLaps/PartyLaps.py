@@ -162,7 +162,7 @@ def acMain(ac_version):
 
         deltaApp = PartyDelta()
 
-        partyLapsApp = PartyLaps("PartyLaps", "Laps", deltaApp)
+        partyLapsApp = PartyLaps(ac, "PartyLaps", "Laps", deltaApp)
         partyLapsApp.refreshParameters()
 
         configApp = PartyLaps_config("PartyLaps_config", "PartyLaps config", fontSizeConfig, 0)
@@ -175,6 +175,7 @@ def acMain(ac_version):
         import traceback
         ac.log("PartyLaps: Error in acMain: %s" % e)
         ac.log(traceback.format_exc())
+
 
 def acShutdown():
     try:
@@ -263,12 +264,11 @@ def onRenderCallback(deltaT):
 
 class PartyLaps:
 
-    def __init__(self, name, headerName, deltaApp):
-        global currentDriver
-
+    def __init__(self, ac, name, headerName, deltaApp):
+        self.ac = ac
         self.headerName = headerName
         self.deltaApp = deltaApp
-        self.window = ac.newApp(name)
+        self.window = self.ac.newApp(name)
 
         self.lastLapDataRefreshed = -1
         self.lastLapViewRefreshed = 0
@@ -279,10 +279,16 @@ class PartyLaps:
         self.bestLapHolder = ""
         self.referenceTime = 0
         self.laps = []
+        self.bestLapFile = bestLapFile
         self.bestLapData = []
         self.currentLapData = [(0.0,0.0)]
+        self.personalBests = {}
         self.sfCrossed = 0
-        self.session = info.graphics.session
+        try:
+            self.session = info.graphics.session
+        except NameError:
+            # In a test
+            pass
         self.lastSession = 0
         self.lapInvalidated = False
         self.justCrossedSf = False
@@ -296,7 +302,7 @@ class PartyLaps:
 
         self.readBestLap()
 
-        self.table = ACTable(ac, self.window)
+        self.table = ACTable(self.ac, self.window)
 
 
     def draw(self):
@@ -305,12 +311,12 @@ class PartyLaps:
         changes.
         """
         if showHeader:
-            ac.setTitle(self.window, self.headerName)
-            ac.setIconPosition(self.window, 0, 0)
+            self.ac.setTitle(self.window, self.headerName)
+            self.ac.setIconPosition(self.window, 0, 0)
             topPadding = 30
         else:
-            ac.setTitle(self.window, "")
-            ac.setIconPosition(self.window, -10000, -10000)
+            self.ac.setTitle(self.window, "")
+            self.ac.setIconPosition(self.window, -10000, -10000)
             topPadding = 0
 
         tableRows = 1 + lapDisplayedCount + showCurrent + showReference + showTotal
@@ -325,7 +331,7 @@ class PartyLaps:
         self.table.draw()
 
         width, height = self.table.getDimensions()
-        ac.setSize(self.window, width, height)
+        self.ac.setSize(self.window, width, height)
 
         self.table.setCellValue("Driver:", 0, 0)
 
@@ -375,8 +381,8 @@ class PartyLaps:
 
     def onRenderCallback(self, deltaT):
         # Update background and border in case the app has been moved
-        ac.setBackgroundOpacity(self.window, float(opacity)/100)
-        ac.drawBorder(self.window, showBorder)
+        self.ac.setBackgroundOpacity(self.window, float(opacity)/100)
+        self.ac.drawBorder(self.window, showBorder)
         self.deltaApp.onRenderCallback()
 
     def updateData(self):
@@ -393,17 +399,17 @@ class PartyLaps:
                 self.justCrossedSf = True
 
     def updateDataFast(self):
-        self.currentTime = ac.getCarState(0, acsys.CS.LapTime)
+        self.currentTime = self.ac.getCarState(0, acsys.CS.LapTime)
 
         if info.graphics.status == 1:
             self.projection = 0
             self.performance = 0
             return
 
-        self.lapDone = ac.getCarState(0, acsys.CS.LapCount)
-        self.currentPosition = ac.getCarState(0, acsys.CS.NormalizedSplinePosition)
+        self.lapDone = self.ac.getCarState(0, acsys.CS.LapCount)
+        self.currentPosition = self.ac.getCarState(0, acsys.CS.NormalizedSplinePosition)
 
-        if ac.isCarInPitline(0):
+        if self.ac.isCarInPitline(0):
             self.pitExitState = PIT_EXIT_STATE_IN_PIT_LANE
         elif self.pitExitState == PIT_EXIT_STATE_IN_PIT_LANE:
             self.pitExitLap = self.lapDone
@@ -435,7 +441,7 @@ class PartyLaps:
 
         self.position = self.currentPosition
         self.lastPosition = self.currentPosition
-        self.bestLapAc = ac.getCarState(0, acsys.CS.BestLap)
+        self.bestLapAc = self.ac.getCarState(0, acsys.CS.BestLap)
 
         self.lapInvalidated = info.physics.numberOfTyresOut == 4 or self.lapInvalidated
 
@@ -497,7 +503,7 @@ class PartyLaps:
             self.projection = self.bestLapTime + self.myPerformance
             self.performance = self.myPerformance + (self.bestLapTime - self.referenceTime)*self.position
         else:
-            self.performanceAc = int(ac.getCarState(0, acsys.CS.PerformanceMeter) * 1000)
+            self.performanceAc = int(self.ac.getCarState(0, acsys.CS.PerformanceMeter) * 1000)
             self.projection = self.bestLapAc + self.performanceAc
             self.performance = self.performanceAc + (self.bestLapAc - self.referenceTime)*self.position
 
@@ -514,11 +520,11 @@ class PartyLaps:
         # Wait 100ms to be sure that the last time is updated
         #time.sleep(0.1)
 
-        # ac.getCarState(0, acsys.CS.LastLap) doesn't work yet
-        #lapTime = ac.getCarState(0, acsys.CS.LastLap)
+        # self.ac.getCarState(0, acsys.CS.LastLap) doesn't work yet
+        #lapTime = self.ac.getCarState(0, acsys.CS.LastLap)
         lapTime = info.graphics.iLastTime
         if lapTime <= 0:
-            lastSplits = ac.getLastSplits(0)
+            lastSplits = self.ac.getLastSplits(0)
             lapTime = 0
             for split in lastSplits:
                 lapTime += split
@@ -532,7 +538,7 @@ class PartyLaps:
             self.bestLapHolder = currentDriver
             self.currentLapData.append((1.0, lapTime))
             self.bestLapData = self.currentLapData
-            #ac.log("PartyLaps: New best lap time: {0} Data: {1}".format(timeToString(self.bestLapTime), str(self.bestLapData)))
+            #self.ac.log("PartyLaps: New best lap time: {0} Data: {1}".format(timeToString(self.bestLapTime), str(self.bestLapData)))
 
         # Reset for the new lap
         self.currentLapData = [(0.0,0.0)]
@@ -703,15 +709,15 @@ class PartyLaps:
                 lapsLogFile.close()
 
         except Exception as e:
-            ac.log("PartyLaps class: Error in writeSession: %s" % e)
+            self.ac.log("PartyLaps class: Error in writeSession: %s" % e)
 
     def readBestLap(self):
         try:
             if logBest == "always":
                 configBestLap = configparser.ConfigParser()
 
-                if os.path.exists(bestLapFile):
-                    configBestLap.read(bestLapFile)
+                if os.path.exists(self.bestLapFile):
+                    configBestLap.read(self.bestLapFile)
                     self.bestLapTime = configBestLap.getint("TIME", "best")
                     try:
                         self.bestLapHolder = configBestLap.get("TIME", "holder")
@@ -726,26 +732,80 @@ class PartyLaps:
                     self.referenceTime = 0
 
         except Exception as e:
-            ac.log("PartyLaps class: Error in writeBestLap: %s" % e)
+            self.ac.log("PartyLaps class: Error in writeBestLap: %s" % e)
+
+        self.readPersonalBests()
+
+
+    def readPersonalBests(self):
+        """
+        Read the personal bests from the bestLapFile and store on
+        self.personalBests.
+        """
+        if logBest != "always":
+            return
+
+        personalBests = {}
+        config = configparser.ConfigParser()
+        config.read(self.bestLapFile)
+
+        sections = config.sections()
+        for section in sections:
+            if not section.startswith("PB_"):
+                continue
+            driver = config.get(section, "driver")
+            time = config.getint(section, "time")
+            data = eval(config.get(section, "data"))
+            personalBests[driver] = {"time":time, "data":data}
+
+        self.personalBests = personalBests
+
+
+    def writePersonalBests(self):
+        """
+        Serialize the personal best information to a config file.
+        """
+        if logBest != "always":
+            return
+
+        config = configparser.ConfigParser()
+        config.read(self.bestLapFile)
+
+        for driver, info in self.personalBests.items():
+            if not driver: # driver name might not be set
+                continue
+            section = "PB_" + driver
+            try:
+                config.add_section(section)
+            except configparser.DuplicateSectionError:
+                pass
+            config.set(section, "driver", driver)
+            config.set(section, "time", str(info['time']))
+            config.set(section, "data", str(info['data']))
+
+        fd = open(self.bestLapFile, "w")
+        config.write(fd)
+        fd.close()
+
 
     def resetBestLap(self):
         try:
             self.bestLapTime = 0
             self.bestLapData = []
 
-            if os.path.exists(bestLapFile):
-                os.remove(bestLapFile)
+            if os.path.exists(self.bestLapFile):
+                os.remove(self.bestLapFile)
 
         except Exception as e:
-            ac.log("PartyLaps class: Error in resetBestLap: %s" % e)
+            self.ac.log("PartyLaps class: Error in resetBestLap: %s" % e)
 
     def writeBestLap(self):
         try:
             if logBest == "always" and self.bestLapTime and len(self.bestLapData) > 0:
                 configBestLap = configparser.ConfigParser()
 
-                if os.path.exists(bestLapFile):
-                    configBestLap.read(bestLapFile)
+                if os.path.exists(self.bestLapFile):
+                    configBestLap.read(self.bestLapFile)
                     lastBest = configBestLap.getint("TIME", "best")
                     if lastBest != 0 and lastBest < self.bestLapTime:
                         return
@@ -757,12 +817,12 @@ class PartyLaps:
                 configBestLap.set("TIME", "holder", str(self.bestLapHolder))
                 configBestLap.set("DATA", "data", str(self.bestLapData))
 
-                fd = open(bestLapFile, "w")
+                fd = open(self.bestLapFile, "w")
                 configBestLap.write(fd)
                 fd.close()
 
         except Exception as e:
-            ac.log("PartyLaps class: Error in writeBestLap: %s" % e)
+            self.ac.log("PartyLaps class: Error in writeBestLap: %s" % e)
 
 '''
 Show header:    Yes       Change

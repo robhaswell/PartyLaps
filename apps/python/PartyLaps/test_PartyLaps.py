@@ -1,5 +1,12 @@
+# python -m unittest
 import unittest
-from PartyLaps import cycleDriver
+import tempfile
+
+from PartyLaps import cycleDriver, PartyLaps
+
+class ACNOOP(object):
+    def newApp(*args):
+        pass
 
 class TestCycleDrivers(unittest.TestCase):
     """
@@ -27,3 +34,35 @@ class TestCycleDrivers(unittest.TestCase):
     def test_rollover(self):
         result = cycleDriver(self.sampleDrivers, "delta")
         self.assertEqual(result, "alpha")
+
+
+class TestPersonalBests(unittest.TestCase):
+    """
+    Tests for reading and writing personal bests.
+    """
+
+    def setUp(self):
+        self.app = PartyLaps(ACNOOP(), "", "", object())
+        self.app.bestLapFile = tempfile.NamedTemporaryFile().name
+
+
+    def test_writeReadSimple(self):
+        """
+        A personal bests without unusual characters in the driver name can be written and then read.
+        """
+        driver = "alpha"
+        pb = {
+                "time": 1234567890,
+                "data": [(0, 0), (1, 1), (2, 2)],
+        }
+        self.app.personalBests = {
+            driver: pb,
+        }
+
+        self.app.writePersonalBests()
+
+        self.app.personalBests = {}
+
+        self.app.readPersonalBests()
+
+        self.assertEqual(self.app.personalBests[driver], pb)
