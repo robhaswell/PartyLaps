@@ -182,6 +182,7 @@ def acShutdown():
         if info.graphics.status != 1:
             partyLapsApp.writeSession()
             partyLapsApp.writeBestLap()
+            partyLapsApp.writePersonalBests()
 
     except Exception as e:
         ac.log("PartyLaps: Error in acShutdown: %s" % e)
