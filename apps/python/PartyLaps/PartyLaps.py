@@ -1088,6 +1088,9 @@ class PartyLaps_config:
             writeParameters()
 
 
+def onClick(a1, a2):
+    ac.console("Clicked delta")
+
 class PartyDelta(object):
     """
     Display the delta in a separate window.
@@ -1107,9 +1110,6 @@ class PartyDelta(object):
         ac.setPosition(self.deltaLabel, 0, 0)
         ac.setFontSize(self.deltaLabel, self.fontSize)
         ac.setFontAlignment(self.deltaLabel, "center")
-
-        def onClick(a1, a2):
-            ac.console("Clicked delta")
 
         ac.addOnClickedListener(self.deltaLabel, onClick)
 
