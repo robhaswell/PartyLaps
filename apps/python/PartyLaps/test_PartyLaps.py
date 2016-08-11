@@ -66,3 +66,47 @@ class TestPersonalBests(unittest.TestCase):
         self.app.readPersonalBests()
 
         self.assertEqual(self.app.personalBests[driver], pb)
+
+
+    def test_writeReadSpecial(self):
+        """
+        A personal bests with special characters in the driver name can be written and then read.
+        """
+        driver = "alpha' omegea"
+        pb = {
+                "time": 1234567890,
+                "data": [(0, 0), (1, 1), (2, 2)],
+        }
+        self.app.personalBests = {
+            driver: pb,
+        }
+
+        self.app.writePersonalBests()
+
+        self.app.personalBests = {}
+
+        self.app.readPersonalBests()
+
+        self.assertEqual(self.app.personalBests[driver], pb)
+
+
+    def test_writeReadUnicode(self):
+        """
+        A personal bests with special characters in the driver name can be written and then read.
+        """
+        driver = "alpha⛄️omegea"
+        pb = {
+                "time": 1234567890,
+                "data": [(0, 0), (1, 1), (2, 2)],
+        }
+        self.app.personalBests = {
+            driver: pb,
+        }
+
+        self.app.writePersonalBests()
+        
+        self.app.personalBests = {}
+
+        self.app.readPersonalBests()
+
+        self.assertEqual(self.app.personalBests[driver], pb)
