@@ -336,8 +336,9 @@ class PartyLaps:
         self.table.setCellValue("Driver:", 0, 0)
 
         self.currRowIndex = lapDisplayedCount + showCurrent
-        self.refRowIndex = lapDisplayedCount + showCurrent + showReference
-        self.totRowIndex = lapDisplayedCount + showCurrent + showReference + showTotal
+        self.refRowIndex = self.currRowIndex + showReference
+        self.pbRowIndex = self.refRowIndex + 1
+        self.totRowIndex = self.pbRowIndex + showTotal
 
         if showCurrent:
             self.table.setCellValue("Curr.", 0, self.currRowIndex)
@@ -353,6 +354,7 @@ class PartyLaps:
             elif reference == "top75":
                 refText = "75%"
             self.table.setCellValue(refText, 0, self.refRowIndex)
+        self.table.setCellValue("Pers.", 0, self.pbRowIndex)
         if showTotal:
             self.table.setCellValue("Tot.", 0, self.totRowIndex)
 
@@ -369,6 +371,12 @@ class PartyLaps:
         self.table.setCellValue(
                 currentDriver if currentDriver != "" else "OPEN CONFIG TO SET DRIVERS",
                 1, 0)
+
+    def setPersonalBestCellValues(self):
+        """
+        Display the correct personal best.
+        """
+        self.table.setCellValue(0, self.pbRowIndex, self.personalBest())
 
 
     def refreshParameters(self):
@@ -404,6 +412,7 @@ class PartyLaps:
         if info.graphics.status == 1:
             self.projection = 0
             self.performance = 0
+            self.pbPerformance = 0
             return
 
         self.lapDone = self.ac.getCarState(0, acsys.CS.LapCount)
@@ -479,33 +488,19 @@ class PartyLaps:
             if self.position > self.currentLapData[len(self.currentLapData)-1][0]:
                 self.currentLapData.append((self.position, self.currentTime))
 
-            # If there is a best lap, calculate the interpolation
-            if len(self.bestLapData):
-
-                # Check where is our actual position in the best lap data
-                index = 0
-                while self.position > self.bestLapData[index][0]:
-                    index += 1
-
-                if index == 0:
-                    self.myPerformance = 0
-                else:
-                    # Interpolation
-                    bestLapDeltaPos  = self.bestLapData[index][0] - self.bestLapData[index-1][0]
-                    bestLapDeltaTime = self.bestLapData[index][1] - self.bestLapData[index-1][1]
-                    currentDeltaPos  = self.position - self.bestLapData[index-1][0]
-                    currentDeltaTime = currentDeltaPos*bestLapDeltaTime/bestLapDeltaPos
-                    self.myPerformance = self.currentTime - self.bestLapData[index-1][1] - currentDeltaTime
-            else:
-                # No best lap, no performance delta.
-                self.myPerformance = 0
+            self.myPerformance = calculateDelta(self.position, self.currentTime, self.bestLapData)
 
             self.projection = self.bestLapTime + self.myPerformance
             self.performance = self.myPerformance + (self.bestLapTime - self.referenceTime)*self.position
+
+            self.pbPerformance = calculateDelta(self.position, self.currentTime, self.personalBestData())
+
         else:
+            # This path is never followed
             self.performanceAc = int(self.ac.getCarState(0, acsys.CS.PerformanceMeter) * 1000)
             self.projection = self.bestLapAc + self.performanceAc
             self.performance = self.performanceAc + (self.bestLapAc - self.referenceTime)*self.position
+            self.pbPerformance = 0
 
     def updateDataNewLap(self):
         """
@@ -539,6 +534,18 @@ class PartyLaps:
             self.currentLapData.append((1.0, lapTime))
             self.bestLapData = self.currentLapData
             #self.ac.log("PartyLaps: New best lap time: {0} Data: {1}".format(timeToString(self.bestLapTime), str(self.bestLapData)))
+
+        # Look for a personal best
+        pb = self.personalBest()
+        if not lockBest and (pb == 0 or lapTime < pb) and not self.lapInvalidated:
+            # New personal best lap time!
+            pbInfo = {
+                "time": lapTime,
+                "data": self.currentLapData,
+            }
+            pbInfo['data'].append((1.0, lapTime))
+            self.personalBests[currentDriver] = pbInfo
+            self.setPersonalBestCellValues()
 
         # Reset for the new lap
         self.currentLapData = [(0.0,0.0)]
@@ -598,8 +605,6 @@ class PartyLaps:
         if self.lastLapViewRefreshed != self.lastLapDataRefreshed and info.graphics.status != 1:
             self.updateViewNewLap()
 
-        self.setDriverCellValues()
-
 
     def updateViewNewLap(self):
         """
@@ -658,9 +663,13 @@ class PartyLaps:
             if self.pitExitState == PIT_EXIT_STATE_APPLY_OFFSET:
                 setDelta(self.table.getCellLabel(2, self.currRowIndex),
                         self.performance-self.pitExitDeltaOffset, self.deltaApp)
+                setDelta(self.table.getCellLabel(2, self.pbRowIndex),
+                        self.pbPerformance-self.pitExitDeltaOffset)
             else:
                 setDelta(self.table.getCellLabel(2, self.currRowIndex),
                         self.performance, self.deltaApp)
+                setDelta(self.table.getCellLabel(2, self.pbRowIndex),
+                        self.pbPerformance)
         else:
             self.table.setCellValue(timeToString(self.currentTime), 1, self.currRowIndex)
             self.table.setCellValue("-.---", 2, self.currRowIndex)
@@ -786,6 +795,26 @@ class PartyLaps:
         fd = open(self.bestLapFile, "w")
         config.write(fd)
         fd.close()
+
+
+    def personalBest(self):
+        """
+        Return the integer personal best lap time.
+        """
+        try:
+            return self.personalBests[currentDriver]['time']
+        except KeyError:
+            return 0
+
+
+    def personalBestData(self):
+        """
+        Return the personal best lap time data.
+        """
+        try:
+            return self.personalBests[currentDriver]['data']
+        except KeyError:
+            return []
 
 
     def resetBestLap(self):
@@ -1455,41 +1484,48 @@ def yesOrNo(value):
     else:
         return "No"
 
-def setDelta(label, delta, deltaApp):
+def setDelta(label, delta, deltaApp=None):
     deltaStr = deltaToString(delta)
     ac.setText(label, deltaStr)
-    deltaApp.setDelta(deltaStr)
+    if deltaApp:
+        deltaApp.setDelta(deltaStr)
 
     if delta >= redAt:
         ac.setFontColor(label, 1, 0, 0, 1)
-        deltaApp.setColor(1, 0, 0, 1)
+        if deltaApp:
+            deltaApp.setColor(1, 0, 0, 1)
     elif delta <= greenAt:
         ac.setFontColor(label, 0, 1, 0, 1)
-        deltaApp.setColor(0, 1, 0, 1)
+        if deltaApp:
+            deltaApp.setColor(0, 1, 0, 1)
     else:
         if deltaColor == "yellow":
             if delta > 0:
                 # color factor [0..1]
                 colorFactor = float(delta)/redAt
                 ac.setFontColor(label, 1, 1-colorFactor, 0, 1)
-                deltaApp.setColor(1, 1-colorFactor, 0, 1)
+                if deltaApp:
+                    deltaApp.setColor(1, 1-colorFactor, 0, 1)
             else:
                 # color factor [0..1]
                 colorFactor = float(delta)/greenAt
                 ac.setFontColor(label, 1-colorFactor, 1, 0, 1)
-                deltaApp.setColor(1-colorFactor, 1, 0, 1)
+                if deltaApp:
+                    deltaApp.setColor(1-colorFactor, 1, 0, 1)
 
         elif deltaColor == "white":
             if delta > 0:
                 # color factor [0..1]
                 colorFactor = float(delta)/redAt
                 ac.setFontColor(label, 1, 1-colorFactor, 1-colorFactor, 1)
-                deltaApp.setColor(1, 1-colorFactor, 1-colorFactor, 1)
+                if deltaApp:
+                    deltaApp.setColor(1, 1-colorFactor, 1-colorFactor, 1)
             else:
                 # color factor [0..1]
                 colorFactor = float(delta)/greenAt
                 ac.setFontColor(label, 1-colorFactor, 1, 1-colorFactor, 1)
-                deltaApp.setColor(1-colorFactor, 1, 1-colorFactor, 1)
+                if deltaApp:
+                    deltaApp.setColor(1-colorFactor, 1, 1-colorFactor, 1)
 
 
 def explodeCSL(string, sep=','):
@@ -1502,6 +1538,7 @@ def onClickDriver(*args):
     currentDriver = cycleDriver(driversList, currentDriver)
     writeParameters()
     partyLapsApp.setDriverCellValues()
+    partyLapsApp.setPersonalBestCellValues()
     return 1
 
 
@@ -1519,3 +1556,29 @@ def cycleDriver(drivers, currentDriver):
         if driver == currentDriver:
             returnNow = True
     return drivers[0]
+
+
+def calculateDelta(position, currentTime, lapData):
+    """
+    Calculate the delta to the reference data.
+    """
+    # If there is a best lap, calculate the interpolation
+    if len(lapData):
+
+        # Check where is our actual position in the best lap data
+        index = 0
+        while position > lapData[index][0]:
+            index += 1
+
+        if index == 0:
+            return 0
+        else:
+            # Interpolation
+            bestLapDeltaPos  = lapData[index][0] - lapData[index-1][0]
+            bestLapDeltaTime = lapData[index][1] - lapData[index-1][1]
+            currentDeltaPos  = position - lapData[index-1][0]
+            currentDeltaTime = currentDeltaPos*bestLapDeltaTime/bestLapDeltaPos
+            return currentTime - lapData[index-1][1] - currentDeltaTime
+    else:
+        # No best lap, no performance delta.
+        return 0
