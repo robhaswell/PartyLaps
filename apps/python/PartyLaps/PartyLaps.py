@@ -667,12 +667,12 @@ class PartyLaps:
                 setDelta(self.table.getCellLabel(2, self.currRowIndex),
                         self.performance-self.pitExitDeltaOffset, self.deltaApp)
                 setDelta(self.table.getCellLabel(2, self.pbRowIndex),
-                        self.pbPerformance-self.pitExitDeltaOffset)
+                        self.pbPerformance-self.pitExitDeltaOffset, self.deltaApp, True)
             else:
                 setDelta(self.table.getCellLabel(2, self.currRowIndex),
                         self.performance, self.deltaApp)
                 setDelta(self.table.getCellLabel(2, self.pbRowIndex),
-                        self.pbPerformance)
+                        self.pbPerformance, self.deltaApp, True)
         else:
             self.table.setCellValue(timeToString(self.currentTime), 1, self.currRowIndex)
             self.table.setCellValue("-.---", 2, self.currRowIndex)
@@ -1178,11 +1178,14 @@ class PartyDelta(object):
     """
 
     fontSize = 36
+    pbFontSize = 24
 
     def __init__(self):
         self.window = ac.newApp("PartyLaps_delta")
+
+        # The reference delta
         self.deltaLabel = ac.addLabel(self.window, "-.---")
-        ac.setSize(self.window, 150, self.fontSize)
+        ac.setSize(self.window, 150, self.fontSize + self.pbFontSize)
         ac.setIconPosition(self.window, -10000, -10000)
         ac.setTitle(self.window, "")
         self.setBackgroundOpacity()
@@ -1191,6 +1194,15 @@ class PartyDelta(object):
         ac.setPosition(self.deltaLabel, 0, 0)
         ac.setFontSize(self.deltaLabel, self.fontSize)
         ac.setFontAlignment(self.deltaLabel, "center")
+
+        # The personal delta
+        self.pbDeltaLabel = ac.addLabel(self.window, "-.---")
+
+        ac.setSize(self.pbDeltaLabel, 150, self.pbFontSize)
+        ac.setPosition(self.pbDeltaLabel, 0, self.fontSize)
+        ac.setFontSize(self.pbDeltaLabel, self.pbFontSize)
+        ac.setFontAlignment(self.pbDeltaLabel, "center")
+
 
 
     def onRenderCallback(self):
@@ -1208,18 +1220,19 @@ class PartyDelta(object):
         ac.drawBorder(self.window, False)
 
 
-    def setDelta(self, delta):
+    def setDelta(self, delta, isPB=False):
         """
         Set the best lap delta.
         """
-        ac.setText(self.deltaLabel, delta)
+        ac.setText(self.deltaLabel if not isPB else self.pbDeltaLabel, delta)
 
 
-    def setColor(self, r, g, b, s):
+    def setColor(self, r, g, b, s, isPB=False):
         """
         Set the delta color.
         """
-        ac.setFontColor(self.deltaLabel, r, g, b, s)
+        ac.setFontColor(self.deltaLabel if not isPB else self.pbDeltaLabel,
+                r, g, b, s)
 
 
 def toggleHeader(dummy, variable):
@@ -1487,20 +1500,20 @@ def yesOrNo(value):
     else:
         return "No"
 
-def setDelta(label, delta, deltaApp=None):
+def setDelta(label, delta, deltaApp=None, isPB=False):
     deltaStr = deltaToString(delta)
     ac.setText(label, deltaStr)
     if deltaApp:
-        deltaApp.setDelta(deltaStr)
+        deltaApp.setDelta(deltaStr, isPB)
 
     if delta >= redAt:
         ac.setFontColor(label, 1, 0, 0, 1)
         if deltaApp:
-            deltaApp.setColor(1, 0, 0, 1)
+            deltaApp.setColor(1, 0, 0, 1, isPB)
     elif delta <= greenAt:
         ac.setFontColor(label, 0, 1, 0, 1)
         if deltaApp:
-            deltaApp.setColor(0, 1, 0, 1)
+            deltaApp.setColor(0, 1, 0, 1, isPB)
     else:
         if deltaColor == "yellow":
             if delta > 0:
@@ -1508,13 +1521,13 @@ def setDelta(label, delta, deltaApp=None):
                 colorFactor = float(delta)/redAt
                 ac.setFontColor(label, 1, 1-colorFactor, 0, 1)
                 if deltaApp:
-                    deltaApp.setColor(1, 1-colorFactor, 0, 1)
+                    deltaApp.setColor(1, 1-colorFactor, 0, 1, isPB)
             else:
                 # color factor [0..1]
                 colorFactor = float(delta)/greenAt
                 ac.setFontColor(label, 1-colorFactor, 1, 0, 1)
                 if deltaApp:
-                    deltaApp.setColor(1-colorFactor, 1, 0, 1)
+                    deltaApp.setColor(1-colorFactor, 1, 0, 1, isPB)
 
         elif deltaColor == "white":
             if delta > 0:
@@ -1522,13 +1535,13 @@ def setDelta(label, delta, deltaApp=None):
                 colorFactor = float(delta)/redAt
                 ac.setFontColor(label, 1, 1-colorFactor, 1-colorFactor, 1)
                 if deltaApp:
-                    deltaApp.setColor(1, 1-colorFactor, 1-colorFactor, 1)
+                    deltaApp.setColor(1, 1-colorFactor, 1-colorFactor, 1, isPB)
             else:
                 # color factor [0..1]
                 colorFactor = float(delta)/greenAt
                 ac.setFontColor(label, 1-colorFactor, 1, 1-colorFactor, 1)
                 if deltaApp:
-                    deltaApp.setColor(1-colorFactor, 1, 1-colorFactor, 1)
+                    deltaApp.setColor(1-colorFactor, 1, 1-colorFactor, 1, isPB)
 
 
 def explodeCSL(string, sep=','):
