@@ -355,6 +355,7 @@ class PartyLaps:
                 refText = "75%"
             self.table.setCellValue(refText, 0, self.refRowIndex)
         self.table.setCellValue("Pers.", 0, self.pbRowIndex)
+        self.table.setCellValue("-:--.---", 1, self.pbRowIndex)
         self.table.setCellValue("-.---", 2, self.pbRowIndex)
         if showTotal:
             self.table.setCellValue("Tot.", 0, self.totRowIndex)
@@ -377,8 +378,7 @@ class PartyLaps:
         """
         Display the correct personal best.
         """
-        pb = self.personalBest()
-        self.table.setCellValue(0, self.pbRowIndex, pb if pb else "-.---")
+        self.table.setCellValue(timeToString(self.personalBest()), 0, self.pbRowIndex)
 
 
     def refreshParameters(self):
