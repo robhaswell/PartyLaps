@@ -636,8 +636,8 @@ class PartyLaps:
                     self.table.setFontColor(1, 1, 1, 1, 1, rowIndex)
 
                 # Refresh delta label
-                setDelta(self.table.getCellLabel(2, self.rowIndex),
-                        self.laps[lapIndex] - self.referenceTime, self.deltaApp)
+                setDelta(self.table.getCellLabel(2, rowIndex),
+                        self.laps[lapIndex] - self.referenceTime)
 
             else:
                 self.table.setCellValue(timeToString(0), 1, rowIndex)
