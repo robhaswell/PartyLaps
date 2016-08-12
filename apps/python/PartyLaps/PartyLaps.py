@@ -182,7 +182,6 @@ def acShutdown():
         if info.graphics.status != 1:
             partyLapsApp.writeSession()
             partyLapsApp.writeBestLap()
-            partyLapsApp.writePersonalBests()
 
     except Exception as e:
         ac.log("PartyLaps: Error in acShutdown: %s" % e)
@@ -758,6 +757,15 @@ class PartyLaps:
             return
 
         personalBests = {}
+        # Load the best lap as the personal best of the holder, for users
+        # upgrading from an earlier version.
+        if self.bestLapHolder:
+            personalBests[self.bestLapHolder] = {
+                "driver": self.bestLapHolder,
+                "time": self.bestLapTime,
+                "data": self.bestLapData,
+            }
+
         config = configparser.ConfigParser()
         config.read(self.bestLapFile)
 
@@ -855,6 +863,8 @@ class PartyLaps:
 
         except Exception as e:
             self.ac.log("PartyLaps class: Error in writeBestLap: %s" % e)
+
+        self.writePersonalBests()
 
 '''
 Show header:    Yes       Change
