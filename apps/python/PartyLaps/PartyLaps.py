@@ -115,6 +115,11 @@ def acMain(ac_version):
         if ac_version < 1.0:
             return "PartyLaps"
 
+        for dirName in ["PartyLaps_bestlap", "PartyLaps_config", "PartyLaps_session"]:
+            fullDirName = "apps/python/PartyLaps/" + dirName
+            if not os.path.exists(fullDirName):
+                os.mkdir(fullDirName)
+
         config = configparser.ConfigParser()
         configFile = "apps/python/PartyLaps/PartyLaps_config/config.ini"
         mlConfigFile = "apps/python/MultiLaps/MultiLaps_config/config.ini"
