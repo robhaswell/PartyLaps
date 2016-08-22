@@ -119,62 +119,33 @@ def acMain(ac_version):
         configFile = "apps/python/PartyLaps/PartyLaps_config/config.ini"
         mlConfigFile = "apps/python/MultiLaps/MultiLaps_config/config.ini"
 
-        if os.path.exists(configFile) or os.path.exists(mlConfigFile):
-            if os.path.exists(configFile):
-                config.read(configFile)
-            else:
-                config.read(mlConfigFile)
+        config.read([configFile, mlConfigFile])
 
-            showHeader        = config.getint("SETTINGS", "showHeader")
-            fontSize          = config.getint("SETTINGS", "fontSize")
-            opacity           = config.getint("SETTINGS", "opacity")
-            showBorder        = config.getint("SETTINGS", "showBorder")
-            lapDisplayedCount = config.getint("SETTINGS", "lapDisplayedCount")
-            showDelta         = config.getint("SETTINGS", "showDelta")
-            deltaColor        = config.get("SETTINGS", "deltaColor")
-            redAt             = config.getint("SETTINGS", "redAt")
-            greenAt           = config.getint("SETTINGS", "greenAt")
-            reference         = config.get("SETTINGS", "reference")
-            showCurrent       = config.getint("SETTINGS", "showCurrent")
-            showTotal         = config.getint("SETTINGS", "showTotal")
-            showReference     = config.getint("SETTINGS", "showReference")
-            updateTime        = config.getint("SETTINGS", "updateTime")
-            logLaps           = config.getint("SETTINGS", "logLaps")
-            logBest           = config.get("SETTINGS", "logBest")
-            lockBest          = config.getint("SETTINGS", "lockBest")
-            driversListText   = config.get("SETTINGS", "driversListText")
-            driversList       = explodeCSL(driversListText)
-            try:
-                currentDriver     = config.get("SETTINGS", "currentDriver")
-            except configparser.NoOptionError:
-                try:
-                    currentDriver = driversList[0]
-                except IndexError:
-                    # This should never happen but hey-ho
-                    currentDriver = ''
-        else:
-            # New config
+        try:
             config.add_section("SETTINGS")
+        except configparser.DuplicateSectionError:
+            pass
 
-            showHeader = 0
-            fontSize = 18
-            opacity = 50
-            showBorder = 1
-            lapDisplayedCount = 5
-            showDelta = 1
-            deltaColor = "white"
-            redAt = 1000
-            greenAt = -1000
-            reference = "best"
-            showCurrent = 1
-            showReference = 1
-            updateTime = 100
-            logLaps = 1
-            logBest = "always"
-            lockBest = 0
-            driversListText = ''
-            driversList = []
-            currentDriver = ''
+        showHeader        = config.getint("SETTINGS", "showHeader", fallback=0)
+        fontSize          = config.getint("SETTINGS", "fontSize", fallback=18)
+        opacity           = config.getint("SETTINGS", "opacity", fallback=50)
+        showBorder        = config.getint("SETTINGS", "showBorder", fallback=0)
+        lapDisplayedCount = config.getint("SETTINGS", "lapDisplayedCount", fallback=5)
+        showDelta         = config.getint("SETTINGS", "showDelta", fallback=1)
+        deltaColor        = config.get("SETTINGS", "deltaColor", fallback="white")
+        redAt             = config.getint("SETTINGS", "redAt", fallback=1000)
+        greenAt           = config.getint("SETTINGS", "greenAt", fallback=1000)
+        reference         = config.get("SETTINGS", "reference", fallback="best")
+        showCurrent       = config.getint("SETTINGS", "showCurrent", fallback=1)
+        showTotal         = config.getint("SETTINGS", "showTotal", fallback=1)
+        showReference     = config.getint("SETTINGS", "showReference", fallback=1)
+        updateTime        = config.getint("SETTINGS", "updateTime", fallback=100)
+        logLaps           = config.getint("SETTINGS", "logLaps", fallback=1)
+        logBest           = config.get("SETTINGS", "logBest", fallback="always")
+        lockBest          = config.getint("SETTINGS", "lockBest", fallback=0)
+        driversListText   = config.get("SETTINGS", "driversListText", fallback='')
+        driversList       = explodeCSL(driversListText)
+        currentDriver     = config.get("SETTINGS", "currentDriver", fallback=driversList[0])
 
         trackName = ac.getTrackName(0)
         trackConf = ac.getTrackConfiguration(0)
@@ -759,23 +730,14 @@ class PartyLaps:
                 bestLapFile = self.bestLapFile
 
                 mlBestLapFile = bestLapFile.replace("PartyLaps", "MultiLaps")
-                if not os.path.exists(bestLapFile) and os.path.exists(mlBestLapFile):
+                if not os.path.exists(bestLapFile):
                     bestLapFile = mlBestLapFile
 
-                if os.path.exists(bestLapFile):
-                    configBestLap.read(bestLapFile)
-                    self.bestLapTime = configBestLap.getint("TIME", "best")
-                    try:
-                        self.bestLapHolder = configBestLap.get("TIME", "holder")
-                    except configparser.NoOptionError:
-                        self.bestLapHolder = ''
-                    self.bestLapData = eval(configBestLap.get("DATA", "data"))
-                    self.referenceTime = self.bestLapTime
-                else:
-                    self.bestLapTime = 0
-                    self.bestLapHolder = ''
-                    self.bestLapData = []
-                    self.referenceTime = 0
+                configBestLap.read(bestLapFile)
+                self.bestLapTime = configBestLap.getint("TIME", "best", fallback=0)
+                self.bestLapHolder = configBestLap.get("TIME", "holder", fallback='')
+                self.bestLapData = eval(configBestLap.get("DATA", "data", fallback="[]"))
+                self.referenceTime = self.bestLapTime
 
         except Exception as e:
             self.ac.log("PartyLaps class: Error in writeBestLap: %s" % e)
