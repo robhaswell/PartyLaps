@@ -124,7 +124,7 @@ def acMain(ac_version):
         configFile = "apps/python/PartyLaps/PartyLaps_config/config.ini"
         mlConfigFile = "apps/python/MultiLaps/MultiLaps_config/config.ini"
 
-        config.read([configFile, mlConfigFile])
+        config.read([mlConfigFile, configFile])
 
         try:
             config.add_section("SETTINGS")
@@ -735,10 +735,8 @@ class PartyLaps:
                 bestLapFile = self.bestLapFile
 
                 mlBestLapFile = bestLapFile.replace("PartyLaps", "MultiLaps")
-                if not os.path.exists(bestLapFile):
-                    bestLapFile = mlBestLapFile
+                configBestLap.read([mlBestLapFile, bestLapFile])
 
-                configBestLap.read(bestLapFile)
                 self.bestLapTime = configBestLap.getint("TIME", "best", fallback=0)
                 self.bestLapHolder = configBestLap.get("TIME", "holder", fallback='')
                 self.bestLapData = eval(configBestLap.get("DATA", "data", fallback="[]"))
