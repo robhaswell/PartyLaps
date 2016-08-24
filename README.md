@@ -1,7 +1,7 @@
 # PartyLaps
 A fork of the MultiLaps mod for Assetto Corsa to better support multiple drivers hotlapping on a single machine.
 
-This project aims to add the following features to MultiLaps:
+This project adds the following features to MultiLaps:
 
 * The ability to provide a list of drivers using the config app.
 * The ability to change the currently lapping driver through the main app.
