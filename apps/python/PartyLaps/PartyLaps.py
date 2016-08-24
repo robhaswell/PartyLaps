@@ -833,6 +833,11 @@ class PartyLaps:
             self.bestLapTime = 0
             self.bestLapData = []
 
+            try:
+                del self.personalBests[currentDriver]
+            except KeyError:
+                pass
+
             if os.path.exists(self.bestLapFile):
                 os.remove(self.bestLapFile)
 

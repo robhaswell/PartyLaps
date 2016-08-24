@@ -1,38 +1,40 @@
 # python -m unittest
-import unittest
+import os.path
 import tempfile
+import unittest
 
-from PartyLaps import cycleDriver, PartyLaps
+import PartyLaps
 
 class ACNOOP(object):
     def newApp(*args):
         pass
 
+
 class TestCycleDrivers(unittest.TestCase):
     """
-    Tests for ``cycleDrivers``.
+    Tests for ``PartyLaps.cycleDrivers``.
     """
 
     sampleDrivers = ['alpha', 'beta', 'gamma', 'delta']
 
     def test_emptyList(self):
-        result = cycleDriver([], "")
+        result = PartyLaps.cycleDriver([], "")
         self.assertEqual(result, "")
 
     def test_emptyDriver(self):
-        result = cycleDriver(self.sampleDrivers, "")
+        result = PartyLaps.cycleDriver(self.sampleDrivers, "")
         self.assertEqual(result, "alpha")
 
     def test_unknownDriver(self):
-        result = cycleDriver(self.sampleDrivers, "The Stig")
+        result = PartyLaps.cycleDriver(self.sampleDrivers, "The Stig")
         self.assertEqual(result, "alpha")
 
     def test_nextDriver(self):
-        result = cycleDriver(self.sampleDrivers, "beta")
+        result = PartyLaps.cycleDriver(self.sampleDrivers, "beta")
         self.assertEqual(result, "gamma")
 
     def test_rollover(self):
-        result = cycleDriver(self.sampleDrivers, "delta")
+        result = PartyLaps.cycleDriver(self.sampleDrivers, "delta")
         self.assertEqual(result, "alpha")
 
 
@@ -42,7 +44,7 @@ class TestPersonalBests(unittest.TestCase):
     """
 
     def setUp(self):
-        self.app = PartyLaps(ACNOOP(), "", "", object())
+        self.app = PartyLaps.PartyLaps(ACNOOP(), "", "", object())
         self.app.bestLapFile = tempfile.NamedTemporaryFile().name
 
 
@@ -110,3 +112,56 @@ class TestPersonalBests(unittest.TestCase):
         self.app.readPersonalBests()
 
         self.assertEqual(self.app.personalBests[driver], pb)
+
+
+    def test_resetCurrentDriver(self):
+        """
+        The current driver's personal best is reset.
+        """
+        PartyLaps.currentDriver = "alpha"
+        pb = {
+                "time": 1234567890,
+                "data": [(0, 0), (1, 1), (2, 2)],
+        }
+        self.app.personalBests = {
+            "alpha": pb,
+            "beta": pb,
+        }
+
+        self.app.writePersonalBests()
+
+        self.app.resetBestLap()
+
+        self.assertNotIn("alpha", self.app.personalBests)
+
+
+    def test_otherDriversNotReset(self):
+        """
+        The other drivers' personal bests are not reset.
+        """
+        PartyLaps.currentDriver = "alpha"
+        pb = {
+                "time": 1234567890,
+                "data": [(0, 0), (1, 1), (2, 2)],
+        }
+        self.app.personalBests = {
+            "alpha": pb,
+            "beta": pb,
+        }
+
+        self.app.writePersonalBests()
+
+        self.app.resetBestLap()
+
+        self.assertIn("beta", self.app.personalBests)
+
+
+    def test_resetRemovesBestLapFile(self):
+        """
+        The best lap file is removed when the best lap is reset.
+        """
+        self.app.writeBestLap()
+        self.assertTrue(os.path.exists(self.app.bestLapFile))
+
+        self.app.resetBestLap()
+        self.assertFalse(os.path.exists(self.app.bestLapFile))
